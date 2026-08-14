@@ -159,6 +159,20 @@ input:focus { border-color: var(--accent); }
 .hint { color: var(--muted); font-size: 13px; margin: 6px 4px 18px; }
 .section-label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .06em; margin: 22px 4px 6px; }
 
+/* Cartões de sugestões */
+.cards { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 620px) { .cards { grid-template-columns: 1fr 1fr; } }
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+.card-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.card-sub { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
+.card-actions { display: flex; gap: 8px; }
+.card-actions .btn { flex: 1; padding: 9px 10px; }
+
 .set-edit-row { display: flex; gap: 8px; margin-bottom: 8px; }
 .set-edit-row input { flex: 1; }
 

@@ -18,28 +18,34 @@
     <header class="topbar">
       <h1>Repertório</h1>
       <div class="topbar-actions">
-        <button id="tab-songs" class="tab active">Músicas</button>
-        <button id="tab-sets" class="tab">Repertórios</button>
+        <button id="tab-sets" class="tab active">Início</button>
+        <button id="tab-songs" class="tab">Buscar</button>
       </div>
     </header>
 
-    <div id="pane-songs" class="pane">
-      <div class="searchbar">
-        <input id="search" type="search" placeholder="Buscar música ou artista…" autocomplete="off" />
-      </div>
-      <ul id="song-list" class="list"></ul>
-      <p id="songs-empty" class="empty hidden">
-        Nenhuma cifra encontrada.<br />
-        Coloque seus arquivos <code>.txt</code> na pasta <code>cifras/</code> do projeto.
+    <div id="pane-sets" class="pane">
+      <button id="new-set" class="btn btn-primary full">+ Novo repertório</button>
+
+      <h3 class="section-label">Sugestões pra você</h3>
+      <div id="proposals" class="cards"></div>
+
+      <h3 class="section-label">Seus repertórios</h3>
+      <ul id="set-list" class="list"></ul>
+      <p id="sets-empty" class="empty hidden">
+        Você ainda não salvou repertórios.<br />Toque em uma sugestão acima ou crie um novo.
       </p>
     </div>
 
-    <div id="pane-sets" class="pane hidden">
+    <div id="pane-songs" class="pane hidden">
       <div class="searchbar">
-        <button id="new-set" class="btn btn-primary full">+ Novo repertório</button>
+        <input id="search" type="search" placeholder="Buscar música, artista ou pasta…" autocomplete="off" />
       </div>
-      <ul id="set-list" class="list"></ul>
-      <p id="sets-empty" class="empty hidden">Nenhum repertório ainda. Crie um para agrupar as músicas do show.</p>
+      <p class="hint" id="search-hint">Busque uma música para tocar ou adicionar a um repertório.</p>
+      <ul id="song-list" class="list"></ul>
+      <p id="songs-empty" class="empty hidden">
+        Nenhuma cifra encontrada.<br />
+        Confira o caminho da sua pasta em <code>repertorio.config.json</code>.
+      </p>
     </div>
   </section>
 
@@ -58,9 +64,14 @@
       <h3 class="section-label">Músicas neste repertório</h3>
       <ul id="set-songs" class="list sortable"></ul>
       <p class="hint">Toque em ↑ ↓ para reordenar, ✕ para remover.</p>
-      <h3 class="section-label">Adicionar músicas</h3>
+
+      <h3 class="section-label">Próximas sugeridas</h3>
+      <p class="hint" id="suggest-hint">Baseado no que você toca junto, no artista e na pasta.</p>
+      <ul id="set-suggest" class="list"></ul>
+
+      <h3 class="section-label">Ou buscar para adicionar</h3>
       <div class="searchbar">
-        <input id="set-add-search" type="search" placeholder="Buscar para adicionar…" autocomplete="off" />
+        <input id="set-add-search" type="search" placeholder="Buscar música, artista ou pasta…" autocomplete="off" />
       </div>
       <ul id="set-add-list" class="list"></ul>
     </div>

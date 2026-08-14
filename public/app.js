@@ -6,8 +6,13 @@
 
 // ---------- Estado ----------
 const state = {
-  songs: [],          // {id, title, artist}
+  songs: [],          // {id, title, artist, dir}
   setlists: [],       // {id, name, songs:[id,...]}
+  stats: { plays: {}, pairs: {} }, // aprendizado
+  songById: {},       // id -> song
+  byDir: {},          // dir -> [songs]
+  byArtist: {},       // artista -> [songs]
+  topDirs: [],        // pastas ordenadas por tamanho
   current: null,      // cifra aberta {id, title, artist, content}
   transpose: 0,
   fontSize: parseInt(localStorage.getItem('fontSize') || '18', 10),
@@ -29,12 +34,115 @@ async function api(url, opts) {
 const getSongs = () => api('/api/songs');
 const getSong = (id) => api('/api/song/' + encodeURIComponent(id));
 const getSetlists = () => api('/api/setlists');
+const getStats = () => api('/api/stats');
 const saveSetlists = () =>
   api('/api/setlists', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(state.setlists),
   }).catch((e) => console.warn('Falha ao salvar repertórios', e));
+
+// Registra que um conjunto de músicas foi tocado junto (aprendizado).
+function learn(songIds) {
+  const ids = (songIds || []).filter(Boolean);
+  if (!ids.length) return;
+  // atualização local imediata (pra sugestões já mudarem)
+  ids.forEach((id) => (state.stats.plays[id] = (state.stats.plays[id] || 0) + 1));
+  const lim = ids.slice(0, 60);
+  for (let i = 0; i < lim.length; i++) {
+    for (let j = 0; j < lim.length; j++) {
+      if (i === j) continue;
+      const a = lim[i], b = lim[j];
+      state.stats.pairs[a] = state.stats.pairs[a] || {};
+      state.stats.pairs[a][b] = (state.stats.pairs[a][b] || 0) + 1;
+    }
+  }
+  api('/api/learn', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ songIds: ids }),
+  }).catch(() => {});
+}
+
+// ---------- Índices e sugestões ----------
+function buildIndexes() {
+  state.songById = {};
+  state.byDir = {};
+  state.byArtist = {};
+  state.songs.forEach((s) => {
+    state.songById[s.id] = s;
+    (state.byDir[s.dir] = state.byDir[s.dir] || []).push(s);
+    if (s.artist) (state.byArtist[s.artist] = state.byArtist[s.artist] || []).push(s);
+  });
+  state.topDirs = Object.keys(state.byDir).sort(
+    (a, b) => state.byDir[b].length - state.byDir[a].length
+  );
+}
+
+function sample(arr, n) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a.slice(0, n);
+}
+
+// Sugere próximas músicas a partir de uma "semente" (as já escolhidas).
+// Combina: co-ocorrência aprendida (tocar junto) > repertórios existentes
+// > mesmo artista > mesma pasta, com um empurrãozinho por popularidade.
+function suggestNext(seedIds, limit) {
+  const seed = new Set(seedIds);
+  const score = new Map();
+  const add = (id, w) => {
+    if (!id || seed.has(id) || !state.songById[id]) return;
+    score.set(id, (score.get(id) || 0) + w);
+  };
+  seedIds.forEach((s) => {
+    const p = state.stats.pairs[s];
+    if (p) for (const k in p) add(k, 3 * p[k]);
+  });
+  state.setlists.forEach((set) => {
+    if (set.songs.some((id) => seed.has(id))) set.songs.forEach((id) => add(id, 2));
+  });
+  const seedSongs = seedIds.map((id) => state.songById[id]).filter(Boolean);
+  const artists = new Set(seedSongs.map((s) => s.artist).filter(Boolean));
+  const dirs = new Set(seedSongs.map((s) => s.dir));
+  artists.forEach((a) => (state.byArtist[a] || []).slice(0, 60).forEach((s) => add(s.id, 0.6)));
+  dirs.forEach((d) => sample(state.byDir[d] || [], 80).forEach((s) => add(s.id, 0.35)));
+  const arr = Array.from(score.entries()).map(([id, w]) => [
+    id,
+    w + Math.min(1.5, (state.stats.plays[id] || 0) * 0.15),
+  ]);
+  arr.sort((a, b) => b[1] - a[1]);
+  return arr.slice(0, limit).map(([id]) => state.songById[id]).filter(Boolean);
+}
+
+// Monta as "listas sugeridas" da tela inicial.
+function proposedLists() {
+  const out = [];
+  const playedIds = Object.keys(state.stats.plays).filter((id) => state.songById[id]);
+  playedIds.sort((a, b) => state.stats.plays[b] - state.stats.plays[a]);
+  if (playedIds.length >= 3) out.push({ title: 'Mais tocadas', songs: playedIds.slice(0, 12) });
+
+  if (state.setlists.length) {
+    const last = state.setlists[state.setlists.length - 1];
+    if (last.songs.length) {
+      const rel = suggestNext(last.songs, 12).map((s) => s.id);
+      if (rel.length >= 3) out.push({ title: 'Parecidas com “' + (last.name || 'seu repertório') + '”', songs: rel });
+    }
+  }
+
+  state.topDirs.filter((d) => d).slice(0, 3).forEach((d) => {
+    const songs = sample(state.byDir[d], 12).map((s) => s.id);
+    if (songs.length >= 3) out.push({ title: 'Explorar: ' + d, songs });
+  });
+
+  if (state.songs.length >= 4) {
+    out.push({ title: 'Mistura do acervo', songs: sample(state.songs, 12).map((s) => s.id) });
+  }
+  return out;
+}
 
 // ---------- Utilidades de acorde ----------
 const SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -282,6 +390,65 @@ function renderSetList() {
   $('#sets-empty').classList.toggle('hidden', state.setlists.length !== 0);
 }
 
+function renderHome() {
+  renderProposals();
+  renderSetList();
+}
+
+// Cartões de listas sugeridas na tela inicial
+function renderProposals() {
+  const box = $('#proposals');
+  box.innerHTML = '';
+  const lists = proposedLists();
+  if (!lists.length) {
+    box.innerHTML = '<p class="hint">As sugestões aparecem conforme você usa o app.</p>';
+    return;
+  }
+  lists.forEach((list) => {
+    const names = list.songs
+      .map((id) => (state.songById[id] ? state.songById[id].title : null))
+      .filter(Boolean)
+      .slice(0, 4)
+      .join(' · ');
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="card-title">' + escapeHtml(list.title) + '</div>' +
+      '<div class="card-sub">' + list.songs.length + ' músicas · ' + escapeHtml(names) + '…</div>';
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+    const play = document.createElement('button');
+    play.className = 'btn btn-primary';
+    play.textContent = '▶ Tocar';
+    play.onclick = () => playSongs(list.songs);
+    const save = document.createElement('button');
+    save.className = 'btn';
+    save.textContent = 'Salvar';
+    save.onclick = () => {
+      const set = { id: uid(), name: list.title, songs: list.songs.slice() };
+      state.setlists.push(set);
+      saveSetlists();
+      renderHome();
+      showToast('Repertório “' + list.title + '” salvo');
+    };
+    actions.appendChild(play);
+    actions.appendChild(save);
+    card.appendChild(actions);
+    box.appendChild(card);
+  });
+}
+
+// Toca uma sequência de músicas (repertório salvo ou sugestão) e aprende.
+function playSongs(songIds) {
+  const ids = (songIds || []).filter((id) => state.songById[id]);
+  if (!ids.length) {
+    alert('Não há músicas para tocar.');
+    return;
+  }
+  learn(ids);
+  openSong(ids[0], { songIds: ids, index: 0 });
+}
+
 function editSet(id) {
   state.editingSetId = id;
   const set = state.setlists.find((s) => s.id === id);
@@ -290,8 +457,57 @@ function editSet(id) {
   $('#set-name').value = set.name || '';
   $('#set-add-search').value = '';
   renderSetSongs();
+  renderSetSuggest();
   renderSetAddList('');
   show('view-set');
+}
+
+function renderSetSuggest() {
+  const set = state.setlists.find((s) => s.id === state.editingSetId);
+  if (!set) return;
+  const ul = $('#set-suggest');
+  ul.innerHTML = '';
+  let sugg;
+  if (set.songs.length) {
+    sugg = suggestNext(set.songs, 10);
+  } else {
+    const played = Object.keys(state.stats.plays)
+      .filter((id) => state.songById[id])
+      .sort((a, b) => state.stats.plays[b] - state.stats.plays[a]);
+    sugg = played.length ? suggestNext(played.slice(0, 5), 10) : sample(state.songs, 10);
+  }
+  if (!sugg.length) {
+    ul.innerHTML = '<li class="list-note">Adicione uma música para receber sugestões.</li>';
+    return;
+  }
+  sugg.forEach((s) => {
+    const li = document.createElement('li');
+    const main = document.createElement('div');
+    main.className = 'li-main';
+    main.innerHTML =
+      '<div class="li-title">' + escapeHtml(s.title) + '</div>' +
+      (s.artist ? '<div class="li-sub">' + escapeHtml(s.artist) + '</div>' : '');
+    main.onclick = () => openSong(s.id);
+    const actions = document.createElement('div');
+    actions.className = 'li-actions';
+    const add = document.createElement('button');
+    add.textContent = '＋';
+    add.title = 'Adicionar ao repertório';
+    add.onclick = () => {
+      if (!set.songs.includes(s.id)) {
+        set.songs.push(s.id);
+        saveSetlists();
+        renderSetSongs();
+        renderSetSuggest();
+        renderSetAddList($('#set-add-search').value);
+        showToast('“' + s.title + '” adicionada');
+      }
+    };
+    actions.appendChild(add);
+    li.appendChild(main);
+    li.appendChild(actions);
+    ul.appendChild(li);
+  });
 }
 
 function renderSetSongs() {
@@ -335,6 +551,7 @@ function removeSetSong(idx) {
   set.songs.splice(idx, 1);
   saveSetlists();
   renderSetSongs();
+  renderSetSuggest();
 }
 
 function renderSetAddList(filter) {
@@ -362,6 +579,7 @@ function renderSetAddList(filter) {
           set.songs.push(s.id);
           saveSetlists();
           renderSetSongs();
+          renderSetSuggest();
           renderSetAddList(filter);
         }
       };
@@ -378,7 +596,7 @@ function playSet(id) {
     alert('Adicione músicas ao repertório primeiro.');
     return;
   }
-  openSong(set.songs[0], { songIds: set.songs.slice(), index: 0 });
+  playSongs(set.songs.slice());
 }
 
 // ---------- Toast ----------
@@ -463,7 +681,7 @@ function wire() {
     $('#tab-songs').classList.remove('active');
     $('#pane-sets').classList.remove('hidden');
     $('#pane-songs').classList.add('hidden');
-    renderSetList();
+    renderHome();
   };
 
   $('#search').oninput = (e) => renderSongList(e.target.value);
@@ -524,12 +742,20 @@ async function boot() {
   } catch (e) {
     state.songs = [];
   }
+  buildIndexes();
   try {
     state.setlists = await getSetlists();
     if (!Array.isArray(state.setlists)) state.setlists = [];
   } catch (e) {
     state.setlists = [];
   }
+  try {
+    const s = await getStats();
+    state.stats = { plays: s.plays || {}, pairs: s.pairs || {} };
+  } catch (e) {
+    state.stats = { plays: {}, pairs: {} };
+  }
+  renderHome();
   renderSongList('');
 }
 
