@@ -10,9 +10,10 @@ const state = {
   setlists: [],       // {id, name, songs:[id,...]}
   stats: { plays: {}, pairs: {} }, // aprendizado
   songById: {},       // id -> song
-  byDir: {},          // dir -> [songs]
+  byStyle: {},        // estilo (pasta de topo) -> [songs]
   byArtist: {},       // artista -> [songs]
-  topDirs: [],        // pastas ordenadas por tamanho
+  topStyles: [],      // estilos ordenados por tamanho
+  topArtists: [],     // artistas ordenados por tamanho
   current: null,      // cifra aberta {id, title, artist, content}
   transpose: 0,
   fontSize: parseInt(localStorage.getItem('fontSize') || '18', 10),
@@ -67,15 +68,19 @@ function learn(songIds) {
 // ---------- Índices e sugestões ----------
 function buildIndexes() {
   state.songById = {};
-  state.byDir = {};
+  state.byStyle = {};
   state.byArtist = {};
   state.songs.forEach((s) => {
     state.songById[s.id] = s;
-    (state.byDir[s.dir] = state.byDir[s.dir] || []).push(s);
+    const st = s.style || '';
+    if (st) (state.byStyle[st] = state.byStyle[st] || []).push(s);
     if (s.artist) (state.byArtist[s.artist] = state.byArtist[s.artist] || []).push(s);
   });
-  state.topDirs = Object.keys(state.byDir).sort(
-    (a, b) => state.byDir[b].length - state.byDir[a].length
+  state.topStyles = Object.keys(state.byStyle).sort(
+    (a, b) => state.byStyle[b].length - state.byStyle[a].length
+  );
+  state.topArtists = Object.keys(state.byArtist).sort(
+    (a, b) => state.byArtist[b].length - state.byArtist[a].length
   );
 }
 
@@ -107,9 +112,10 @@ function suggestNext(seedIds, limit) {
   });
   const seedSongs = seedIds.map((id) => state.songById[id]).filter(Boolean);
   const artists = new Set(seedSongs.map((s) => s.artist).filter(Boolean));
-  const dirs = new Set(seedSongs.map((s) => s.dir));
+  const styles = new Set(seedSongs.map((s) => s.style).filter(Boolean));
+  // mesmo artista pesa mais que mesmo estilo
   artists.forEach((a) => (state.byArtist[a] || []).slice(0, 60).forEach((s) => add(s.id, 0.6)));
-  dirs.forEach((d) => sample(state.byDir[d] || [], 80).forEach((s) => add(s.id, 0.35)));
+  styles.forEach((st) => sample(state.byStyle[st] || [], 80).forEach((s) => add(s.id, 0.3)));
   const arr = Array.from(score.entries()).map(([id, w]) => [
     id,
     w + Math.min(1.5, (state.stats.plays[id] || 0) * 0.15),
@@ -133,9 +139,14 @@ function proposedLists() {
     }
   }
 
-  state.topDirs.filter((d) => d).slice(0, 3).forEach((d) => {
-    const songs = sample(state.byDir[d], 12).map((s) => s.id);
-    if (songs.length >= 3) out.push({ title: 'Explorar: ' + d, songs });
+  state.topStyles.filter((d) => d).slice(0, 3).forEach((st) => {
+    const songs = sample(state.byStyle[st], 12).map((s) => s.id);
+    if (songs.length >= 3) out.push({ title: 'Explorar: ' + st, songs });
+  });
+
+  state.topArtists.filter((a) => a && state.byArtist[a].length >= 3).slice(0, 2).forEach((a) => {
+    const songs = sample(state.byArtist[a], 12).map((s) => s.id);
+    out.push({ title: 'Só de ' + a, songs });
   });
 
   if (state.songs.length >= 4) {
@@ -238,14 +249,14 @@ function renderSongList(filter) {
   );
   const items = all.slice(0, MAX_RENDER);
   ul.innerHTML = '';
-  let lastDir = null;
+  let lastGrp = null;
   items.forEach((s) => {
-    const dir = s.dir || '';
-    if (dir !== lastDir) {
-      lastDir = dir;
+    const grp = s.style || s.dir || '';
+    if (grp !== lastGrp) {
+      lastGrp = grp;
       const h = document.createElement('li');
       h.className = 'group-header';
-      h.textContent = dir || 'Raiz';
+      h.textContent = grp || 'Outros';
       ul.appendChild(h);
     }
     const li = document.createElement('li');
@@ -253,7 +264,7 @@ function renderSongList(filter) {
     main.className = 'li-main';
     main.innerHTML =
       '<div class="li-title">' + escapeHtml(s.title) + '</div>' +
-      (s.artist && s.artist !== dir
+      (s.artist && s.artist !== grp
         ? '<div class="li-sub">' + escapeHtml(s.artist) + '</div>'
         : '');
     main.onclick = () => openSong(s.id);
