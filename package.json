@@ -1,0 +1,12 @@
+{
+  "name": "repertorio",
+  "version": "1.0.0",
+  "description": "App local de cifras para montar repertório e tocar no iPad",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

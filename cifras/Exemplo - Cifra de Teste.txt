@@ -1,0 +1,27 @@
+[Intro]  C  G  Am  F
+
+[Primeira Parte]
+C                 G
+Esta é uma cifra de exemplo
+Am                F
+Só pra você testar o app
+C                    G
+Aperte + no Tom pra transpor
+Am              F
+E arraste a fonte pra caber
+
+[Refrão]
+F              C
+Coloque suas cifras
+G              Am
+Na pasta cifras do projeto
+F              C
+Nomeie assim: Artista - Musica.txt
+G                 C
+E monte seu repertorio
+
+[Ponte]
+Dm      G       C      Am
+Dm      G       C
+
+[Final]  C  G  C

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0f1115" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Repertório" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/style.css" />
+  <title>Repertório</title>
+</head>
+<body>
+  <!-- ===== Tela de lista ===== -->
+  <section id="view-list" class="view">
+    <header class="topbar">
+      <h1>Repertório</h1>
+      <div class="topbar-actions">
+        <button id="tab-songs" class="tab active">Músicas</button>
+        <button id="tab-sets" class="tab">Repertórios</button>
+      </div>
+    </header>
+
+    <div id="pane-songs" class="pane">
+      <div class="searchbar">
+        <input id="search" type="search" placeholder="Buscar música ou artista…" autocomplete="off" />
+      </div>
+      <ul id="song-list" class="list"></ul>
+      <p id="songs-empty" class="empty hidden">
+        Nenhuma cifra encontrada.<br />
+        Coloque seus arquivos <code>.txt</code> na pasta <code>cifras/</code> do projeto.
+      </p>
+    </div>
+
+    <div id="pane-sets" class="pane hidden">
+      <div class="searchbar">
+        <button id="new-set" class="btn btn-primary full">+ Novo repertório</button>
+      </div>
+      <ul id="set-list" class="list"></ul>
+      <p id="sets-empty" class="empty hidden">Nenhum repertório ainda. Crie um para agrupar as músicas do show.</p>
+    </div>
+  </section>
+
+  <!-- ===== Tela de edição de repertório ===== -->
+  <section id="view-set" class="view hidden">
+    <header class="topbar">
+      <button class="icon-btn" data-back-to-sets>‹ Voltar</button>
+      <h1 id="set-title-h">Repertório</h1>
+      <button id="play-set" class="btn btn-primary">▶ Tocar</button>
+    </header>
+    <div class="pane">
+      <div class="set-edit-row">
+        <input id="set-name" type="text" placeholder="Nome do repertório" />
+        <button id="delete-set" class="btn btn-danger">Excluir</button>
+      </div>
+      <h3 class="section-label">Músicas neste repertório</h3>
+      <ul id="set-songs" class="list sortable"></ul>
+      <p class="hint">Toque em ↑ ↓ para reordenar, ✕ para remover.</p>
+      <h3 class="section-label">Adicionar músicas</h3>
+      <div class="searchbar">
+        <input id="set-add-search" type="search" placeholder="Buscar para adicionar…" autocomplete="off" />
+      </div>
+      <ul id="set-add-list" class="list"></ul>
+    </div>
+  </section>
+
+  <!-- ===== Visualizador de cifra ===== -->
+  <section id="view-song" class="view hidden">
+    <header class="topbar song-topbar">
+      <button class="icon-btn" id="song-back">‹</button>
+      <div class="song-heading">
+        <div id="song-title" class="song-title">—</div>
+        <div id="song-artist" class="song-artist"></div>
+      </div>
+      <button class="icon-btn" id="toggle-tools" title="Ferramentas">⚙</button>
+    </header>
+
+    <div id="tools" class="tools hidden">
+      <div class="tool">
+        <span class="tool-label">Tom</span>
+        <button class="chip" id="tr-down">−</button>
+        <span id="transpose-val" class="tool-val">0</span>
+        <button class="chip" id="tr-up">+</button>
+        <button class="chip" id="tr-reset">↺</button>
+      </div>
+      <div class="tool">
+        <span class="tool-label">Fonte</span>
+        <button class="chip" id="fs-down">A−</button>
+        <button class="chip" id="fs-up">A+</button>
+      </div>
+      <div class="tool">
+        <span class="tool-label">Rolagem</span>
+        <button class="chip" id="scroll-toggle">▶</button>
+        <input id="scroll-speed" type="range" min="1" max="20" value="6" />
+      </div>
+      <div class="tool">
+        <button class="chip" id="add-to-set">＋ Repertório</button>
+      </div>
+    </div>
+
+    <div id="song-nav" class="song-nav hidden">
+      <button id="prev-song" class="btn">‹ Anterior</button>
+      <span id="song-pos" class="song-pos"></span>
+      <button id="next-song" class="btn">Próxima ›</button>
+    </div>
+
+    <pre id="chart" class="chart"></pre>
+  </section>
+
+  <!-- ===== Modal simples ===== -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <h3 id="modal-title">Adicionar ao repertório</h3>
+      <ul id="modal-list" class="list"></ul>
+      <button class="btn full" id="modal-close">Fechar</button>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

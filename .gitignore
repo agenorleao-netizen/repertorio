@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+
+# Suas cifras e repertórios ficam só no seu notebook (descomente para não versionar):
+# cifras/*.txt
+# data/setlists.json
