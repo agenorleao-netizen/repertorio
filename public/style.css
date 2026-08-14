@@ -117,6 +117,20 @@ input:focus { border-color: var(--accent); }
   cursor: pointer;
 }
 .li-count { font-size: 13px; color: var(--muted); background: var(--bg-3); padding: 3px 9px; border-radius: 999px; }
+.group-header {
+  display: block;
+  padding: 16px 4px 6px;
+  border-bottom: none;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  position: sticky;
+  top: calc(52px + var(--safe-top));
+  background: var(--bg);
+  z-index: 5;
+}
 
 .empty { color: var(--muted); text-align: center; padding: 40px 20px; line-height: 1.7; }
 .empty code { background: var(--bg-3); padding: 2px 6px; border-radius: 6px; }

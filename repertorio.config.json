@@ -1,0 +1,6 @@
+{
+  "_ajuda": "Coloque abaixo o caminho da pasta onde SUAS cifras já estão. Use barras normais / mesmo no Windows. Deixe vazio para usar a pasta ./cifras do projeto.",
+  "_exemplo_mac_linux": "/Users/agenor/Documents/Cifras",
+  "_exemplo_windows": "C:/Users/agenor/Documents/Cifras",
+  "cifrasDir": ""
+}

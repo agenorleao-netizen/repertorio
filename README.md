@@ -6,8 +6,9 @@ iPad acessa pelo Safari na mesma rede Wi‑Fi.
 
 ## Recursos
 
-- 📄 Lê suas cifras `.txt` da pasta `cifras/` (estilo CifraClub)
-- 🔎 Busca por música ou artista
+- 📄 Lê suas cifras `.txt` **direto da pasta onde já estão** (inclusive
+  subpastas — sem mover nem renomear nada)
+- 🔎 Busca por música, artista ou pasta; lista agrupada por subpasta
 - 🎚️ **Transpor tom** (+/‑ semitons), com detecção automática dos acordes
 - 📜 **Rolagem automática** com velocidade ajustável (tocar sem as mãos)
 - 🔠 Ajuste de fonte e **modo escuro** (bom pro palco)
@@ -21,14 +22,24 @@ iPad acessa pelo Safari na mesma rede Wi‑Fi.
 Ter o **Node.js** instalado no notebook (versão 14 ou mais nova).
 Confira com: `node --version`.
 
-### 2. Colocar suas cifras
-Copie seus arquivos `.txt` para a pasta **`cifras/`**. Nomeie assim:
+### 2. Apontar para a pasta das suas cifras
+Você **não precisa mover nem renomear nada**. É só dizer ao app onde suas
+cifras já estão. Abra o arquivo **`repertorio.config.json`** e coloque o
+caminho da sua pasta no campo `cifrasDir` (use barras `/` mesmo no Windows):
 
-```
-Artista - Nome da Música.txt
+```json
+{ "cifrasDir": "/Users/agenor/Documents/Cifras" }
 ```
 
-(Veja `cifras/README.md` para detalhes do formato.)
+O app varre **as subpastas também**, e usa o nome de cada subpasta como
+categoria/artista na lista. Se um arquivo tiver o nome no formato
+`Artista - Música.txt`, ele separa artista e título automaticamente.
+
+> Alternativas ao arquivo de config: `node server.js "/caminho/das/cifras"`
+> ou `CIFRAS_DIR="/caminho/das/cifras" node server.js`.
+
+Se deixar o `cifrasDir` vazio, ele usa a pasta `cifras/` do projeto (onde
+tem uma cifra de exemplo pra testar).
 
 ### 3. Iniciar o servidor
 No terminal, dentro da pasta do projeto:

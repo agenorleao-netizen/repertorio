@@ -124,16 +124,27 @@ function renderSongList(filter) {
   const ul = $('#song-list');
   const q = (filter || '').toLowerCase().trim();
   const items = state.songs.filter(
-    (s) => !q || (s.title + ' ' + s.artist).toLowerCase().includes(q)
+    (s) => !q || (s.title + ' ' + s.artist + ' ' + (s.dir || '')).toLowerCase().includes(q)
   );
   ul.innerHTML = '';
+  let lastDir = null;
   items.forEach((s) => {
+    const dir = s.dir || '';
+    if (dir !== lastDir) {
+      lastDir = dir;
+      const h = document.createElement('li');
+      h.className = 'group-header';
+      h.textContent = dir || 'Raiz';
+      ul.appendChild(h);
+    }
     const li = document.createElement('li');
     const main = document.createElement('div');
     main.className = 'li-main';
     main.innerHTML =
       '<div class="li-title">' + escapeHtml(s.title) + '</div>' +
-      (s.artist ? '<div class="li-sub">' + escapeHtml(s.artist) + '</div>' : '');
+      (s.artist && s.artist !== dir
+        ? '<div class="li-sub">' + escapeHtml(s.artist) + '</div>'
+        : '');
     main.onclick = () => openSong(s.id);
     li.appendChild(main);
     ul.appendChild(li);
@@ -314,7 +325,7 @@ function renderSetAddList(filter) {
   const ul = $('#set-add-list');
   ul.innerHTML = '';
   state.songs
-    .filter((s) => !q || (s.title + ' ' + s.artist).toLowerCase().includes(q))
+    .filter((s) => !q || (s.title + ' ' + s.artist + ' ' + (s.dir || '')).toLowerCase().includes(q))
     .slice(0, 60)
     .forEach((s) => {
       const inSet = set.songs.includes(s.id);
