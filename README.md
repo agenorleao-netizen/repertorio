@@ -16,7 +16,31 @@ iPad acessa pelo Safari na mesma rede Wi‑Fi.
   em sequência (Anterior / Próxima)
 - 📲 Dá pra "Adicionar à Tela de Início" no iPad e abrir em tela cheia
 
-## Como usar
+## ✅ Jeito mais fácil (sem instalar nada): `repertorio.html`
+
+Se você não quer mexer com Terminal, use o arquivo **`repertorio.html`**:
+
+1. Baixe o arquivo `repertorio.html` para o seu computador
+2. Dê **dois cliques** nele — abre no navegador (use **Chrome** no Mac)
+3. Clique em **“📂 Escolher pasta das cifras”** e selecione a pasta onde suas
+   cifras `.txt` estão (ex.: `Downloads/40 MIL CIFRAS + DICIONÁRIOS`)
+4. Pronto! Monte repertórios, busque, transponha, toque
+
+Não precisa de Node, nem Terminal, nem servidor. As cifras **não saem do seu
+computador** — o app só as lê dentro do navegador. Seus repertórios ficam
+salvos no próprio navegador.
+
+> Ao escolher a pasta, o navegador pode mostrar um aviso perguntando se você
+> quer “enviar/usar” os arquivos. Pode confirmar — é leitura local, nada é
+> enviado pra internet.
+
+---
+
+## Versão com servidor (opcional, para usar também no iPad)
+
+O restante abaixo é só se você quiser rodar como servidor local e acessar de
+outro aparelho (iPad) na mesma rede. Para uso no próprio computador, o
+`repertorio.html` acima já basta.
 
 ### 1. Pré-requisito
 Ter o **Node.js** instalado no notebook (versão 14 ou mais nova).
