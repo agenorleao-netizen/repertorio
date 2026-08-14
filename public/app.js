@@ -120,12 +120,15 @@ function show(view) {
 }
 
 // ---------- Lista de músicas ----------
+const MAX_RENDER = 300;
+
 function renderSongList(filter) {
   const ul = $('#song-list');
   const q = (filter || '').toLowerCase().trim();
-  const items = state.songs.filter(
+  const all = state.songs.filter(
     (s) => !q || (s.title + ' ' + s.artist + ' ' + (s.dir || '')).toLowerCase().includes(q)
   );
+  const items = all.slice(0, MAX_RENDER);
   ul.innerHTML = '';
   let lastDir = null;
   items.forEach((s) => {
@@ -146,9 +149,24 @@ function renderSongList(filter) {
         ? '<div class="li-sub">' + escapeHtml(s.artist) + '</div>'
         : '');
     main.onclick = () => openSong(s.id);
+    const actions = document.createElement('div');
+    actions.className = 'li-actions';
+    const add = document.createElement('button');
+    add.textContent = '＋';
+    add.title = 'Adicionar a um repertório';
+    add.onclick = (e) => { e.stopPropagation(); openAddToSetModal(s.id); };
+    actions.appendChild(add);
     li.appendChild(main);
+    li.appendChild(actions);
     ul.appendChild(li);
   });
+  if (all.length > MAX_RENDER) {
+    const note = document.createElement('li');
+    note.className = 'list-note';
+    note.textContent =
+      'Mostrando ' + MAX_RENDER + ' de ' + all.length + ' — digite na busca para refinar.';
+    ul.appendChild(note);
+  }
   $('#songs-empty').classList.toggle('hidden', state.songs.length !== 0);
 }
 
@@ -363,31 +381,68 @@ function playSet(id) {
   openSong(set.songs[0], { songIds: set.songs.slice(), index: 0 });
 }
 
+// ---------- Toast ----------
+let toastTimer = null;
+function showToast(msg) {
+  let t = $('#toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
 // ---------- Modal: adicionar a um repertório ----------
-function openAddToSetModal() {
-  if (!state.current) return;
+function addSongToSet(set, songId) {
+  const song = state.songs.find((s) => s.id === songId);
+  const name = song ? song.title : 'Música';
+  if (set.songs.includes(songId)) {
+    showToast('“' + name + '” já está em ' + (set.name || 'repertório'));
+  } else {
+    set.songs.push(songId);
+    saveSetlists();
+    showToast('Adicionada a “' + (set.name || 'repertório') + '”');
+  }
+  $('#modal').classList.add('hidden');
+}
+
+function openAddToSetModal(songId) {
+  const id = songId || (state.current && state.current.id);
+  if (!id) return;
+  const song = state.songs.find((s) => s.id === id);
+  $('#modal-title').textContent = 'Adicionar “' + (song ? song.title : 'música') + '” a…';
   const ul = $('#modal-list');
   ul.innerHTML = '';
-  if (!state.setlists.length) {
-    const li = document.createElement('li');
-    li.innerHTML = '<div class="li-main">Nenhum repertório. Crie um na aba Repertórios.</div>';
-    ul.appendChild(li);
-  }
+
+  const li0 = document.createElement('li');
+  const b = document.createElement('button');
+  b.className = 'btn btn-primary full';
+  b.textContent = '＋ Novo repertório';
+  b.onclick = () => {
+    const name = (prompt('Nome do novo repertório:', 'Show') || '').trim();
+    if (!name) return;
+    const set = { id: uid(), name, songs: [] };
+    state.setlists.push(set);
+    addSongToSet(set, id);
+  };
+  li0.appendChild(b);
+  li0.style.borderBottom = 'none';
+  ul.appendChild(li0);
+
   state.setlists.forEach((set) => {
     const li = document.createElement('li');
     const main = document.createElement('div');
     main.className = 'li-main';
-    const has = set.songs.includes(state.current.id);
+    const has = set.songs.includes(id);
     main.innerHTML =
       '<div class="li-title">' + escapeHtml(set.name || 'Sem nome') + '</div>' +
       '<div class="li-sub">' + (has ? 'já contém esta música' : set.songs.length + ' música(s)') + '</div>';
-    main.onclick = () => {
-      if (!set.songs.includes(state.current.id)) {
-        set.songs.push(state.current.id);
-        saveSetlists();
-      }
-      $('#modal').classList.add('hidden');
-    };
+    main.onclick = () => addSongToSet(set, id);
     li.appendChild(main);
     ul.appendChild(li);
   });
@@ -449,7 +504,7 @@ function wire() {
   $('#fs-up').onclick = () => { state.fontSize = Math.min(40, state.fontSize + 1); applyFontSize(); };
   $('#scroll-toggle').onclick = () => (state.scroll.on ? stopScroll() : startScroll());
   $('#scroll-speed').oninput = (e) => (state.scroll.speed = parseInt(e.target.value, 10));
-  $('#add-to-set').onclick = openAddToSetModal;
+  $('#add-to-set').onclick = () => openAddToSetModal();
   $('#prev-song').onclick = () => navSong(-1);
   $('#next-song').onclick = () => navSong(1);
 
