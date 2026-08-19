@@ -109,3 +109,18 @@ repertorio/
 
 Os acordes e a transposição são calculados no próprio app. Nada sai do seu
 notebook.
+
+---
+
+## Também neste repositório: 🧭 Sistema de Recrutamento
+
+A pasta [`recrutamento/`](recrutamento/) traz um sistema separado, para
+processos de *executive search*: banco de profissionais, assignments com
+pipeline por etapas, importação de perfil do LinkedIn e relatórios de progresso.
+Roda do mesmo jeito — Node local, sem instalar nada:
+
+```bash
+node recrutamento/server.js
+```
+
+Veja [`recrutamento/README.md`](recrutamento/README.md).

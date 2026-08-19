@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistema de Recrutamento</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topo">
+  <div class="marca">🧭 <strong>Recrutamento</strong></div>
+  <nav class="menu">
+    <a href="#/painel" data-rota="painel">Painel</a>
+    <a href="#/assignments" data-rota="assignments">Assignments</a>
+    <a href="#/candidatos" data-rota="candidatos">Candidatos</a>
+    <a href="#/clientes" data-rota="clientes">Clientes</a>
+    <a href="#/relatorios" data-rota="relatorios">Relatórios</a>
+  </nav>
+  <div class="topo-dir">
+    <span id="aviso-modo" class="tag tag-cinza" title=""></span>
+    <button class="btn btn-fantasma" id="btn-backup">Backup</button>
+  </div>
+</header>
+
+<main id="app" class="conteudo"></main>
+
+<div id="modal" class="modal escondido">
+  <div class="modal-caixa">
+    <div class="modal-topo">
+      <h3 id="modal-titulo"></h3>
+      <button class="btn btn-fantasma" id="modal-fechar">✕</button>
+    </div>
+    <div id="modal-corpo" class="modal-corpo"></div>
+  </div>
+</div>
+
+<div id="aviso" class="aviso escondido"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

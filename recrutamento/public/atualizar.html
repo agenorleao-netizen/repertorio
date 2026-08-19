@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Confirme seu perfil</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="conteudo" style="max-width:720px">
+  <h1>Confirme e atualize seus dados</h1>
+  <p class="subtexto">Estes são os dados que temos sobre você no nosso processo de seleção.
+  Corrija o que estiver desatualizado — leva dois minutos e nos ajuda a te apresentar do jeito certo.</p>
+
+  <div id="carregando" class="vazio">Carregando…</div>
+
+  <form id="formulario" class="escondido">
+    <div class="cartao">
+      <div class="grade g2">
+        <div class="campo"><label>Nome</label><input name="nome"></div>
+        <div class="campo"><label>Como você se descreve em uma linha</label><input name="headline"></div>
+        <div class="campo"><label>Cargo atual</label><input name="cargoAtual"></div>
+        <div class="campo"><label>Empresa atual</label><input name="empresaAtual"></div>
+        <div class="campo"><label>Cidade / estado</label><input name="localizacao"></div>
+        <div class="campo"><label>LinkedIn</label><input name="linkedinUrl" placeholder="https://linkedin.com/in/..."></div>
+        <div class="campo"><label>E-mail</label><input name="email" type="email"></div>
+        <div class="campo"><label>Telefone / WhatsApp</label><input name="telefone"></div>
+      </div>
+      <div class="campo"><label>Resumo da sua trajetória</label><textarea name="resumo"></textarea></div>
+      <div class="campo"><label>Experiência — uma por linha: Cargo | Empresa | Período</label><textarea name="experiencias"></textarea></div>
+      <div class="campo"><label>Formação — uma por linha: Instituição | Curso | Período</label><textarea name="formacao"></textarea></div>
+      <div class="grade g2">
+        <div class="campo"><label>Competências (separadas por vírgula)</label><input name="competencias"></div>
+        <div class="campo"><label>Idiomas (separados por vírgula)</label><input name="idiomas"></div>
+        <div class="campo"><label>Remuneração atual (opcional)</label><input name="remuneracaoAtual"></div>
+        <div class="campo"><label>Pretensão (opcional)</label><input name="remuneracaoPretendida"></div>
+      </div>
+      <div class="campo"><label>Momento de carreira / disponibilidade</label><input name="disponibilidade"
+        placeholder="Ex.: aberto a conversar, mudança para SP possível"></div>
+      <div class="campo"><label>O que te interessa numa próxima oportunidade</label><textarea name="interesses"></textarea></div>
+    </div>
+
+    <div class="cartao">
+      <h3>Uso dos seus dados (LGPD)</h3>
+      <p class="subtexto">Usamos os dados acima apenas para avaliar sua aderência a processos de seleção
+      e apresentar seu perfil a empresas clientes quando fizer sentido. Você pode pedir acesso, correção
+      ou exclusão a qualquer momento.</p>
+      <label style="display:flex;gap:8px;align-items:flex-start;color:var(--texto);font-size:14px">
+        <input type="checkbox" id="consente" style="width:auto;margin-top:3px">
+        <span>Autorizo o tratamento dos meus dados para essa finalidade.</span>
+      </label>
+      <div class="linha" style="margin-top:14px">
+        <button class="btn" type="submit">Enviar</button>
+        <button class="btn btn-fantasma" type="button" id="btn-excluir">Peço a exclusão dos meus dados</button>
+      </div>
+    </div>
+  </form>
+
+  <div id="pronto" class="cartao escondido"><h2>Recebido, obrigado!</h2>
+    <p class="subtexto">Seus dados foram atualizados. Se precisar mudar algo, use o mesmo link.</p></div>
+</main>
+
+<script>
+const token = location.pathname.split('/').filter(Boolean).pop();
+const form = document.getElementById('formulario');
+const linhas = (lista, campos) => (lista || []).map((o) => campos.map((k) => o[k] || '').join(' | ')).join('\n');
+const paraLista = (txt, campos) => txt.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+  const p = l.split('|').map((s) => s.trim()); const o = {};
+  campos.forEach((k, i) => { o[k] = p[i] || ''; }); return o;
+});
+
+async function iniciar() {
+  const r = await fetch('/api/portal/' + token);
+  if (!r.ok) {
+    document.getElementById('carregando').textContent = 'Este link não é mais válido. Fale com o consultor que te enviou.';
+    return;
+  }
+  const c = await r.json();
+  const v = (n) => form.querySelector(`[name="${n}"]`);
+  ['nome', 'headline', 'cargoAtual', 'empresaAtual', 'localizacao', 'linkedinUrl', 'email',
+   'telefone', 'resumo', 'disponibilidade', 'interesses'].forEach((k) => { v(k).value = c[k] || ''; });
+  v('experiencias').value = linhas(c.experiencias, ['cargo', 'empresa', 'periodo']);
+  v('formacao').value = linhas(c.formacao, ['instituicao', 'curso', 'periodo']);
+  v('competencias').value = (c.competencias || []).join(', ');
+  v('idiomas').value = (c.idiomas || []).join(', ');
+  v('remuneracaoAtual').value = (c.remuneracao || {}).atual || '';
+  v('remuneracaoPretendida').value = (c.remuneracao || {}).pretendida || '';
+  if ((c.consentimento || {}).status === 'concedido') document.getElementById('consente').checked = true;
+  document.getElementById('carregando').classList.add('escondido');
+  form.classList.remove('escondido');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!document.getElementById('consente').checked &&
+      !confirm('Sem a autorização não podemos manter seus dados para os processos. Enviar mesmo assim?')) return;
+  const v = (n) => form.querySelector(`[name="${n}"]`).value.trim();
+  const corpo = {
+    nome: v('nome'), headline: v('headline'), cargoAtual: v('cargoAtual'), empresaAtual: v('empresaAtual'),
+    localizacao: v('localizacao'), linkedinUrl: v('linkedinUrl'), email: v('email'), telefone: v('telefone'),
+    resumo: v('resumo'), disponibilidade: v('disponibilidade'), interesses: v('interesses'),
+    experiencias: paraLista(v('experiencias'), ['cargo', 'empresa', 'periodo']),
+    formacao: paraLista(v('formacao'), ['instituicao', 'curso', 'periodo']),
+    competencias: v('competencias').split(',').map((s) => s.trim()).filter(Boolean),
+    idiomas: v('idiomas').split(',').map((s) => s.trim()).filter(Boolean),
+    remuneracao: { atual: v('remuneracaoAtual'), pretendida: v('remuneracaoPretendida') },
+    consente: document.getElementById('consente').checked
+  };
+  const r = await fetch('/api/portal/' + token, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo)
+  });
+  if (!r.ok) { alert('Não consegui enviar agora. Tente de novo em instantes.'); return; }
+  form.classList.add('escondido');
+  document.getElementById('pronto').classList.remove('escondido');
+});
+
+document.getElementById('btn-excluir').addEventListener('click', async () => {
+  if (!confirm('Vamos apagar todos os seus dados do nosso sistema. Confirma?')) return;
+  const r = await fetch('/api/portal/' + token, { method: 'DELETE' });
+  if (!r.ok) { alert('Não consegui apagar agora. Fale com o consultor.'); return; }
+  form.classList.add('escondido');
+  document.getElementById('pronto').innerHTML =
+    '<h2>Dados excluídos</h2><p class="subtexto">Removemos seus dados do nosso sistema.</p>';
+  document.getElementById('pronto').classList.remove('escondido');
+});
+
+iniciar();
+</script>
+</body>
+</html>

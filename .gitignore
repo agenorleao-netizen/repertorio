@@ -4,3 +4,8 @@ node_modules/
 # Suas cifras e repertórios ficam só no seu notebook (descomente para não versionar):
 # cifras/*.txt
 # data/setlists.json
+
+# Base de dados do sistema de recrutamento (dados reais não vão para o git)
+recrutamento/dados/base.json
+recrutamento/dados/base.json.tmp
+recrutamento/dados/backups/
