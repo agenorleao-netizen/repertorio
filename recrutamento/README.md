@@ -15,7 +15,28 @@ Cobre os quatro pontos que a operação pediu:
 
 ---
 
-## Como rodar
+## ✅ Jeito mais fácil (sem instalar nada): `recrutamento.html`
+
+1. Baixe o arquivo **`recrutamento.html`** (é um arquivo só — o sistema inteiro
+   está dentro dele)
+2. Dê **dois cliques** — abre no navegador (use **Chrome** no Mac)
+3. Pronto. Clique em **Backup → Carregar dados de exemplo** para ver funcionando
+
+Não precisa de Node, nem Terminal, nem servidor. Os dados ficam salvos no
+próprio navegador, naquele computador. Nesse modo o *link de atualização do
+candidato* não funciona (ele depende do servidor para receber a resposta) —
+para isso, use a versão com servidor abaixo.
+
+> Exporte de vez em quando em **Backup → Exportar tudo (JSON)**: como os dados
+> ficam no navegador, limpar o histórico/cache leva a base junto.
+
+---
+
+## Versão com servidor (recomendada para uso de verdade)
+
+Vale a pena porque os dados ficam num arquivo seu (`dados/base.json`, com backup
+diário), o time inteiro acessa pela rede Wi-Fi e o link de atualização do
+candidato funciona.
 
 Precisa apenas do **Node.js** (14 ou mais novo). No terminal, dentro da pasta do projeto:
 
@@ -41,12 +62,6 @@ Para mudar a porta: `PORT=9000 node recrutamento/server.js`.
 comum, que dá para copiar, versionar ou abrir em qualquer editor. O servidor
 guarda uma cópia por dia em `recrutamento/dados/backups/`. Nada sai do seu
 computador.
-
-> Dá também para abrir `recrutamento/public/index.html` com dois cliques, sem
-> servidor. Nesse "modo navegador" tudo funciona, mas os dados ficam salvos só
-> naquele navegador e o *link de atualização do candidato* não funciona (ele
-> depende do servidor para receber a resposta). Para uso de verdade, use o
-> servidor.
 
 ---
 
@@ -135,6 +150,8 @@ está em `public/atualizar.html`.
 
 ```
 recrutamento/
+├── recrutamento.html      # o sistema inteiro num arquivo só (dois cliques)
+├── gerar-arquivo-unico.js # regera o arquivo acima a partir de public/
 ├── server.js              # servidor local, sem dependências
 ├── dados/
 │   ├── base.json          # toda a base (candidatos, clientes, assignments)
@@ -148,6 +165,9 @@ recrutamento/
 
 Sem banco de dados, sem `npm install`, sem build. Para levar tudo para outro
 computador, copie a pasta — ou use *Backup → Exportar tudo (JSON)*.
+
+Mexeu em algo dentro de `public/`? Rode `node recrutamento/gerar-arquivo-unico.js`
+para atualizar o `recrutamento.html`.
 
 ---
 

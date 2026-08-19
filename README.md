@@ -117,7 +117,8 @@ notebook.
 A pasta [`recrutamento/`](recrutamento/) traz um sistema separado, para
 processos de *executive search*: banco de profissionais, assignments com
 pipeline por etapas, importação de perfil do LinkedIn e relatórios de progresso.
-Roda do mesmo jeito — Node local, sem instalar nada:
+Roda do mesmo jeito: dois cliques em `recrutamento/recrutamento.html`, ou, para
+usar em rede e com o link de atualização do candidato:
 
 ```bash
 node recrutamento/server.js
