@@ -6,14 +6,28 @@
 <title>Sistema de Recrutamento</title>
 <!-- Arquivo único gerado por gerar-arquivo-unico.js — edite public/ e rode o gerador de novo. -->
 <style>
+/* Tokens: claro por padrão; escuro quando o sistema (ou o visualizador) pede.
+   Os blocos [data-theme] existem para quem abre a versão online, onde o tema
+   vem carimbado na raiz do documento. */
 :root{
+  --fundo:#f4f6f9; --painel:#ffffff; --painel2:#eef2f7; --borda:#d8e0ea;
+  --texto:#14202b; --texto2:#5a6b7b; --acento:#2f6fd0; --acento2:#1f8a5b;
+  --alerta:#c8402f; --aviso:#b57d10; --raio:10px;
+  --t-verde:#15704a; --t-azul:#1f5fbf; --t-amarelo:#8a5d00; --t-vermelho:#a8321f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
+    --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
+    --alerta:#e0574a; --aviso:#e2a83b;
+    --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
+  }
+}
+:root[data-theme="dark"]{
   --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
   --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
-  --alerta:#e0574a; --aviso:#e2a83b; --raio:10px;
-}
-@media (prefers-color-scheme: light){
-  :root{ --fundo:#f4f6f9; --painel:#ffffff; --painel2:#f0f3f7; --borda:#dbe2ea;
-         --texto:#14202b; --texto2:#5a6b7b; }
+  --alerta:#e0574a; --aviso:#e2a83b;
+  --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--fundo);color:var(--texto);
@@ -67,10 +81,10 @@ tr.clicavel:hover{background:var(--painel2);cursor:pointer}
 
 .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;
   background:var(--painel2);border:1px solid var(--borda);color:var(--texto2)}
-.tag-verde{background:rgba(46,163,107,.16);border-color:rgba(46,163,107,.4);color:#3fbd85}
-.tag-azul{background:rgba(79,156,249,.16);border-color:rgba(79,156,249,.4);color:#6fb0ff}
-.tag-amarela{background:rgba(226,168,59,.16);border-color:rgba(226,168,59,.4);color:#e2a83b}
-.tag-vermelha{background:rgba(224,87,74,.16);border-color:rgba(224,87,74,.4);color:#ef7c70}
+.tag-verde{background:rgba(46,163,107,.16);border-color:rgba(46,163,107,.4);color:var(--t-verde)}
+.tag-azul{background:rgba(79,156,249,.16);border-color:rgba(79,156,249,.4);color:var(--t-azul)}
+.tag-amarela{background:rgba(226,168,59,.16);border-color:rgba(226,168,59,.4);color:var(--t-amarelo)}
+.tag-vermelha{background:rgba(224,87,74,.16);border-color:rgba(224,87,74,.4);color:var(--t-vermelho)}
 .tag-cinza{background:var(--painel2)}
 
 .subtexto{color:var(--texto2);font-size:13px}
@@ -224,7 +238,30 @@ function aviso(texto, ms) {
   aviso._t = setTimeout(() => el.classList.add('escondido'), ms || 2600);
 }
 
-function baixar(nomeArquivo, conteudo, tipo) {
+async function baixar(nomeArquivo, conteudo, tipo) {
+  // Na versão online quem entrega o arquivo é o próprio visualizador; um
+  // link de download comum é bloqueado lá.
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      const downloads = await window.claude.use('downloads');
+      if (downloads) {
+        try {
+          await downloads.save({ filename: nomeArquivo, data: conteudo });
+        } catch (e) {
+          if (e && (e.code === 'extension_not_enabled' || e.code === 'rejected_extension')) {
+            await downloads.save({ filename: nomeArquivo.replace(/\.[^.]+$/, '') + '.txt', data: conteudo });
+            aviso('Salvei como .txt — renomeie para .csv para abrir no Excel.', 6000);
+          } else if (e && e.code === 'declined') {
+            return;
+          } else { throw e; }
+        }
+        return;
+      }
+    } catch (e) {
+      aviso('Não consegui salvar o arquivo aqui.', 4000);
+      return;
+    }
+  }
   const blob = new Blob([conteudo], { type: (tipo || 'text/plain') + ';charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -244,8 +281,8 @@ function csv(linhas) {
 
 async function carregar() {
   try {
-    // Aberto direto do arquivo (file://) não tem servidor para conversar.
-    if (location.protocol === 'file:') throw new Error('sem servidor');
+    // Arquivo local (file://) e versão online não têm servidor para conversar.
+    if (location.protocol === 'file:' || window.RECRUTAMENTO_ONLINE) throw new Error('sem servidor');
     const r = await fetch('api/base', { cache: 'no-store' });
     if (!r.ok) throw new Error('sem api');
     base = Object.assign(baseVazia(), await r.json());
@@ -289,7 +326,7 @@ function salvar() {
 function marcarModo() {
   const el = $('#aviso-modo');
   if (modoLocal) {
-    el.textContent = 'modo navegador';
+    el.textContent = window.RECRUTAMENTO_ONLINE ? 'versão online' : 'modo navegador';
     el.title = 'Sem servidor: os dados ficam salvos apenas neste navegador. Use "Backup" para exportar.';
   } else {
     el.textContent = 'servidor local';
@@ -579,7 +616,18 @@ function telaPainel() {
   const atividades = (base.atividades || []).slice(0, 12).map((at) =>
     `<li><div>${esc(at.texto)}</div><div class="q">${fmtData(at.data)}</div></li>`).join('');
 
+  const primeiraVez = !base.assignments.length && !base.candidatos.length && !base.clientes.length;
+
   return `
+  ${primeiraVez ? `<div class="cartao" style="border-color:var(--acento)">
+    <h2>Primeira vez por aqui?</h2>
+    <p class="subtexto">Carregue um cliente, um assignment e três profissionais fictícios para
+    entender o fluxo — depois é só apagar e começar com os seus dados.</p>
+    <div class="linha">
+      <button class="btn" data-acao="carregarExemplo">Carregar dados de exemplo</button>
+      <button class="btn btn-sec" data-acao="novoAssignment">Começar do zero</button>
+    </div></div>` : ''}
+
   <div class="linha" style="margin-bottom:14px">
     <h1>Painel</h1>
     <div class="espaco"></div>
@@ -1700,9 +1748,11 @@ acoes.exportarBackup = () => {
 
 acoes.abrirBackup = () => {
   abrirModal('Backup e dados', `
-    <p class="subtexto">${modoLocal
-      ? 'Você está no <strong>modo navegador</strong>: os dados ficam salvos apenas neste computador/navegador. Exporte com frequência.'
-      : 'Os dados ficam em <code>dados/base.json</code>, na pasta do projeto. O servidor guarda uma cópia diária em <code>dados/backups/</code>.'}</p>
+    <p class="subtexto">${!modoLocal
+      ? 'Os dados ficam em <code>dados/base.json</code>, na pasta do projeto. O servidor guarda uma cópia diária em <code>dados/backups/</code>.'
+      : window.RECRUTAMENTO_ONLINE
+        ? 'Você está na <strong>versão online</strong>: dá para usar o sistema inteiro, e os dados ficam salvos neste navegador. Para a operação de verdade — base num arquivo seu, backup diário e o link de atualização do candidato — rode a versão local. <strong>Exporte o JSON com frequência.</strong>'
+        : 'Você está no <strong>modo navegador</strong>: os dados ficam salvos apenas neste computador/navegador. Exporte com frequência.'}</p>
     <div class="linha" style="margin-bottom:14px">
       <button class="btn" data-acao="exportarBackup">Exportar tudo (JSON)</button>
       <button class="btn btn-sec" data-acao="exportarCandidatosCSV">Candidatos (CSV)</button>

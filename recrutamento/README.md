@@ -151,7 +151,8 @@ está em `public/atualizar.html`.
 ```
 recrutamento/
 ├── recrutamento.html      # o sistema inteiro num arquivo só (dois cliques)
-├── gerar-arquivo-unico.js # regera o arquivo acima a partir de public/
+├── recrutamento-online.html # mesma coisa, para publicar como página hospedada
+├── gerar-arquivo-unico.js # regera os dois arquivos acima a partir de public/
 ├── server.js              # servidor local, sem dependências
 ├── dados/
 │   ├── base.json          # toda a base (candidatos, clientes, assignments)
@@ -167,7 +168,7 @@ Sem banco de dados, sem `npm install`, sem build. Para levar tudo para outro
 computador, copie a pasta — ou use *Backup → Exportar tudo (JSON)*.
 
 Mexeu em algo dentro de `public/`? Rode `node recrutamento/gerar-arquivo-unico.js`
-para atualizar o `recrutamento.html`.
+para atualizar o `recrutamento.html` e o `recrutamento-online.html`.
 
 ---
 

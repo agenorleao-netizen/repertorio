@@ -31,3 +31,23 @@ if (saida.includes('href="style.css"') || saida.includes('src="app.js"')) {
 const destino = path.join(raiz, 'recrutamento.html');
 fs.writeFileSync(destino, saida, 'utf8');
 console.log(`Pronto: ${destino} (${Math.round(saida.length / 1024)} KB)`);
+
+// Versão para publicar como página hospedada: sem <html>/<head>/<body>,
+// porque o hospedeiro monta esse invólucro.
+const corpo = html.slice(html.indexOf('<body>') + '<body>'.length, html.indexOf('</body>'))
+  .replace('<script src="app.js"></script>', '')
+  .trim();
+
+const online = [
+  '<title>Sistema de Recrutamento</title>',
+  '<style>', css, '</style>',
+  corpo,
+  '<script>',
+  'window.RECRUTAMENTO_ONLINE = true;',
+  js,
+  '<\/script>'
+].join('\n');
+
+const destinoOnline = path.join(raiz, 'recrutamento-online.html');
+fs.writeFileSync(destinoOnline, online, 'utf8');
+console.log(`Pronto: ${destinoOnline} (${Math.round(online.length / 1024)} KB)`);

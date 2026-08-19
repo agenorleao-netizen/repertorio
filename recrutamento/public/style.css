@@ -1,11 +1,25 @@
+/* Tokens: claro por padrão; escuro quando o sistema (ou o visualizador) pede.
+   Os blocos [data-theme] existem para quem abre a versão online, onde o tema
+   vem carimbado na raiz do documento. */
 :root{
+  --fundo:#f4f6f9; --painel:#ffffff; --painel2:#eef2f7; --borda:#d8e0ea;
+  --texto:#14202b; --texto2:#5a6b7b; --acento:#2f6fd0; --acento2:#1f8a5b;
+  --alerta:#c8402f; --aviso:#b57d10; --raio:10px;
+  --t-verde:#15704a; --t-azul:#1f5fbf; --t-amarelo:#8a5d00; --t-vermelho:#a8321f;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
+    --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
+    --alerta:#e0574a; --aviso:#e2a83b;
+    --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
+  }
+}
+:root[data-theme="dark"]{
   --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
   --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
-  --alerta:#e0574a; --aviso:#e2a83b; --raio:10px;
-}
-@media (prefers-color-scheme: light){
-  :root{ --fundo:#f4f6f9; --painel:#ffffff; --painel2:#f0f3f7; --borda:#dbe2ea;
-         --texto:#14202b; --texto2:#5a6b7b; }
+  --alerta:#e0574a; --aviso:#e2a83b;
+  --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--fundo);color:var(--texto);
@@ -59,10 +73,10 @@ tr.clicavel:hover{background:var(--painel2);cursor:pointer}
 
 .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;
   background:var(--painel2);border:1px solid var(--borda);color:var(--texto2)}
-.tag-verde{background:rgba(46,163,107,.16);border-color:rgba(46,163,107,.4);color:#3fbd85}
-.tag-azul{background:rgba(79,156,249,.16);border-color:rgba(79,156,249,.4);color:#6fb0ff}
-.tag-amarela{background:rgba(226,168,59,.16);border-color:rgba(226,168,59,.4);color:#e2a83b}
-.tag-vermelha{background:rgba(224,87,74,.16);border-color:rgba(224,87,74,.4);color:#ef7c70}
+.tag-verde{background:rgba(46,163,107,.16);border-color:rgba(46,163,107,.4);color:var(--t-verde)}
+.tag-azul{background:rgba(79,156,249,.16);border-color:rgba(79,156,249,.4);color:var(--t-azul)}
+.tag-amarela{background:rgba(226,168,59,.16);border-color:rgba(226,168,59,.4);color:var(--t-amarelo)}
+.tag-vermelha{background:rgba(224,87,74,.16);border-color:rgba(224,87,74,.4);color:var(--t-vermelho)}
 .tag-cinza{background:var(--painel2)}
 
 .subtexto{color:var(--texto2);font-size:13px}
