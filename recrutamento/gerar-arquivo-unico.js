@@ -38,8 +38,13 @@ const corpo = html.slice(html.indexOf('<body>') + '<body>'.length, html.indexOf(
   .replace('<script src="app.js"></script>', '')
   .trim();
 
+// As fontes vêm do Google Fonts; no arquivo hospedado elas entram junto com o
+// conteúdo, já que o invólucro <head> é montado pelo hospedeiro.
+const fontes = (html.match(/<link rel="preconnect"[\s\S]*?display=swap">/) || [''])[0];
+
 const online = [
   '<title>Sistema de Recrutamento</title>',
+  fontes,
   '<style>', css, '</style>',
   corpo,
   '<script>',

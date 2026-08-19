@@ -65,13 +65,60 @@ computador.
 
 ---
 
+## Acesso ao sistema
+
+O sistema pede login. No primeiro start, o servidor cria o administrador e
+mostra a senha no terminal (também grava em `dados/PRIMEIRO-ACESSO.txt`):
+
+```
+usuário: admin@recrutamento.local
+senha:   Admin@2026
+```
+
+A troca dessa senha é pedida no primeiro login. Depois, em **Usuários**, o
+administrador cria os demais acessos — os consultores da consultoria precisam
+estar cadastrados aqui, porque é dessa lista que sai o "consultor responsável"
+de cada assignment.
+
+Três papéis:
+
+| Papel | Pode |
+|---|---|
+| **Administrador** | tudo, inclusive usuários e configurações |
+| **Consultor** | assignments, profissionais, clientes e relatórios |
+| **Somente leitura** | consultar e imprimir relatórios, sem alterar nada |
+
+As senhas ficam guardadas como hash (scrypt) e a sessão é um cookie HttpOnly
+que vale 12 horas; dez tentativas erradas seguidas de um mesmo endereço
+travam o login por 15 minutos.
+
+> **Na versão sem servidor** (arquivo único e página online) o login existe e
+> separa os papéis, mas a base mora no navegador de quem abre — ali ele é uma
+> tranca de porta, não um cofre. Controle de acesso de verdade exige o servidor.
+> A própria tela de acesso avisa isso.
+
+---
+
 ## O dia a dia
 
-1. **Clientes** — cadastre a empresa e o contato.
-2. **Assignments** — crie a busca (posição, cliente, consultor, prazo, job spec).
-   As etapas vêm prontas — Mapeado → Abordado → Entrevista consultor →
-   Short list → Entrevista cliente → Proposta → Contratado — e podem ser
-   trocadas assignment a assignment.
+1. **Clientes** — a empresa, **quantos contatos quiser** (nome, cargo, e-mail,
+   telefone) e, se fizer sentido, o **pacote típico daquela empresa**, que serve
+   de ponto de partida nas buscas dela.
+2. **Assignments** — a busca em quatro abas:
+   - **Dados**: posição, cliente, **qual contato é o ponto focal**, consultor
+     responsável (escolhido entre os usuários do sistema), prazo, status.
+   - **Pacote**: fixo mensal e anual, bônus (% do salário, valor ou nº de
+     salários) com a regra, benefícios marcados de uma lista padronizada e
+     participação de longo prazo. Dá para puxar o pacote padrão do cliente e
+     ajustar, ou salvar o desta posição como o novo padrão dele.
+   - **Job spec**: missão, entregas esperadas, competências separadas entre
+     **obrigatórias e desejáveis** (com anos de experiência), formação (curso,
+     onde estudou, nível), idiomas com nível, títulos de cargo a procurar,
+     praças, empresas-alvo e off-limits.
+   - **Processo**: escolha um processo de seleção configurado (o padrão vem
+     pronto) e ajuste as etapas só desta busca, ou salve as etapas ajustadas
+     como um novo processo reutilizável. Os processos da consultoria ficam em
+     **Configurações**.
 3. **Candidatos** — importe do LinkedIn ou cadastre manualmente. O banco é
    reaproveitável: o mesmo profissional pode estar em vários processos.
 4. **Pipeline** — dentro do assignment, arraste a ficha entre as etapas.
@@ -79,7 +126,11 @@ computador.
    (ativo, declinou, descartado, stand-by, contratado) e anotações datadas.
    O sistema guarda todo o histórico de movimentação e avisa quem está parado
    há 14 dias ou mais.
-5. **Relatórios** — imprima em PDF, copie como texto (para colar no e-mail do
+5. **Busca no LinkedIn** — dentro do assignment, o sistema monta a *string
+   booleana* a partir do job spec (títulos e obrigatórias com `AND`, desejáveis
+   como bloco `OR`, off-limits com `NOT`), com botão para copiar ou abrir direto
+   na busca de pessoas do LinkedIn.
+6. **Relatórios** — imprima em PDF, copie como texto (para colar no e-mail do
    cliente) ou exporte CSV para o Excel.
 
 ---
@@ -99,8 +150,18 @@ LinkedIn" fazem uma destas três coisas:
    que exige contrato do LinkedIn Recruiter e certificação do ATS;
 3. **Recebimento de currículo** — o candidato exporta ou envia o próprio perfil.
 
-O que este sistema faz, sem depender de contrato nem de extensão:
+O que este sistema faz, sem depender de contrato nem de extensão — três
+caminhos, do mais automático ao mais garantido:
 
+- **Pelo link do perfil:** cole a URL e clique em *Carregar*. Com o servidor
+  rodando, ele tenta ler a página pública do perfil. Funciona quando o LinkedIn
+  entrega a página; quando ele responde com muro de login ou 403 — o que é o
+  comportamento normal para quem não está logado — a tela diz isso e oferece os
+  outros dois caminhos.
+- **Bookmarklet "Capturar perfil":** arraste o botão da tela de importação para
+  a barra de favoritos. Estando no perfil, um clique copia os dados já limpos
+  para a área de transferência. É o mesmo princípio da extensão que Invenias e
+  Cluen usam, sem instalar nada.
 - **Importar do LinkedIn (assistido):** abra o perfil, selecione a página inteira
   (`Ctrl/Cmd + A`), copie e cole na tela de importação. O sistema separa nome,
   headline, localização, URL, experiências, formação, competências e idiomas, e
@@ -172,15 +233,27 @@ para atualizar o `recrutamento.html` e o `recrutamento-online.html`.
 
 ---
 
+## Configurações (administrador)
+
+- **Processos de seleção**: quantos quiser, cada um com suas etapas. Um deles é
+  o padrão que aparece pré-selecionado ao abrir uma busca. Mudar um processo não
+  mexe nos assignments que já estão rodando.
+- **Benefícios**: a lista que vira as caixinhas do pacote, no cliente e no
+  assignment — é o que mantém a remuneração padronizada entre as buscas.
+- **Moeda** usada nos pacotes.
+
+---
+
 ## Próximos passos possíveis
 
 Coisas que fazem sentido quando a operação crescer, em ordem de retorno:
 
-1. **Vários usuários ao mesmo tempo** — hoje a trava de concorrência é simples
-   (quem gravou por último com versão velha é avisado e recarrega). Com 3+
-   consultores gravando junto, vale trocar o arquivo JSON por SQLite.
-2. **Extensão de navegador** para importar do LinkedIn em um clique, no lugar do
-   copiar/colar.
+1. **Vários usuários ao mesmo tempo** — a base inteira é gravada de uma vez;
+   quando duas pessoas salvam junto, a segunda grava por cima e o sistema avisa.
+   Com 3+ consultores trabalhando simultaneamente, vale trocar o arquivo JSON
+   por SQLite e gravar por registro.
+2. **Sessões que sobrevivem ao restart** — hoje elas moram na memória do
+   servidor, então reiniciar pede login de novo.
 3. **Envio de e-mail/WhatsApp direto do sistema** (hoje ele gera a mensagem
    pronta para copiar).
 4. **Portal do cliente** — o contratante acompanha o funil da própria busca, sem

@@ -5,165 +5,443 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sistema de Recrutamento</title>
 <!-- Arquivo único gerado por gerar-arquivo-unico.js — edite public/ e rode o gerador de novo. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600&display=swap">
 <style>
-/* Tokens: claro por padrão; escuro quando o sistema (ou o visualizador) pede.
-   Os blocos [data-theme] existem para quem abre a versão online, onde o tema
-   vem carimbado na raiz do documento. */
+/* ============================================================
+   Sistema de Recrutamento — identidade "dossiê de busca".
+   Tokens claros no :root; escuro por preferência do sistema e
+   por carimbo [data-theme], que é como a versão online avisa.
+   ============================================================ */
 :root{
-  --fundo:#f4f6f9; --painel:#ffffff; --painel2:#eef2f7; --borda:#d8e0ea;
-  --texto:#14202b; --texto2:#5a6b7b; --acento:#2f6fd0; --acento2:#1f8a5b;
-  --alerta:#c8402f; --aviso:#b57d10; --raio:10px;
-  --t-verde:#15704a; --t-azul:#1f5fbf; --t-amarelo:#8a5d00; --t-vermelho:#a8321f;
+  --ground:#eceff3;      /* porcelana fria, viés levemente azulado */
+  --surface:#ffffff;
+  --surface2:#f3f5f8;
+  --linha:#dae1e9;
+  --linha-forte:#c3cede;
+  --ink:#101820;
+  --ink2:#59677a;
+  --ink3:#8494a6;
+  --acento:#14487f;      /* azul-marinho de autoridade */
+  --acento-suave:#e5edf8;
+  --latao:#a9761f;       /* destaque quente, usado com parcimônia */
+  --latao-suave:#f6eddc;
+  --ok:#186b4a;  --ok-suave:#e2f2ea;
+  --atencao:#8a5b12; --atencao-suave:#f8eeda;
+  --erro:#a63421; --erro-suave:#fae9e5;
+  --etapa-l:38%;         /* luminosidade da rampa do funil */
+  --etapa-s:44%;
+  --btn-texto:#ffffff;
+  --raio:12px;
+  --raio-p:8px;
+  --sombra:0 1px 2px rgba(16,24,32,.05), 0 8px 24px -16px rgba(16,24,32,.28);
+  --lateral:230px;
+  --serif:"Fraunces",Iowan Old Style,Palatino,Georgia,serif;
+  --sans:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
-    --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
-    --alerta:#e0574a; --aviso:#e2a83b;
-    --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
+    --ground:#0d1218; --surface:#141b23; --surface2:#1b242e;
+    --linha:#28323f; --linha-forte:#3a4757;
+    --ink:#e9eef3; --ink2:#9aa8b6; --ink3:#7a8896;
+    --acento:#7fb0ff; --acento-suave:#17293f;
+    --latao:#d7a64c; --latao-suave:#33291a;
+    --ok:#4cc38a; --ok-suave:#14291f;
+    --atencao:#e2a83b; --atencao-suave:#2b2416;
+    --erro:#f0796b; --erro-suave:#301b18;
+    --etapa-l:62%; --etapa-s:48%;
+    --btn-texto:#0d1218;
+    --sombra:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.9);
   }
 }
 :root[data-theme="dark"]{
-  --fundo:#0f1216; --painel:#161b22; --painel2:#1c232d; --borda:#28313d;
-  --texto:#e6edf3; --texto2:#9aa7b4; --acento:#4f9cf9; --acento2:#2ea36b;
-  --alerta:#e0574a; --aviso:#e2a83b;
-  --t-verde:#3fbd85; --t-azul:#6fb0ff; --t-amarelo:#e2a83b; --t-vermelho:#ef7c70;
+  --ground:#0d1218; --surface:#141b23; --surface2:#1b242e;
+  --linha:#28323f; --linha-forte:#3a4757;
+  --ink:#e9eef3; --ink2:#9aa8b6; --ink3:#7a8896;
+  --acento:#7fb0ff; --acento-suave:#17293f;
+  --latao:#d7a64c; --latao-suave:#33291a;
+  --ok:#4cc38a; --ok-suave:#14291f;
+  --atencao:#e2a83b; --atencao-suave:#2b2416;
+  --erro:#f0796b; --erro-suave:#301b18;
+  --etapa-l:62%; --etapa-s:48%;
+  --btn-texto:#0d1218;
+  --sombra:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -18px rgba(0,0,0,.9);
 }
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--fundo);color:var(--texto);
-  font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+html,body{height:100%}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font:400 15px/1.5 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
 a{color:var(--acento);text-decoration:none}
-h1,h2,h3,h4{margin:0 0 .5em}
-h1{font-size:22px} h2{font-size:18px} h3{font-size:16px}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4{margin:0;text-wrap:balance}
+h1{font:600 27px/1.2 var(--serif);letter-spacing:-.01em}
+h2{font:600 19px/1.25 var(--serif)}
+h3{font:600 15px/1.3 var(--sans);letter-spacing:.01em}
+h4{font:600 13px/1.3 var(--sans)}
+p{margin:0 0 10px}
+:focus-visible{outline:2px solid var(--acento);outline-offset:2px;border-radius:4px}
 
-.topo{display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--painel);
-  border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:20;flex-wrap:wrap}
-.marca{font-size:16px}
-.menu{display:flex;gap:4px;flex-wrap:wrap}
-.menu a{padding:6px 12px;border-radius:999px;color:var(--texto2)}
-.menu a:hover{background:var(--painel2);color:var(--texto)}
-.menu a.ativo{background:var(--acento);color:#fff}
-.topo-dir{margin-left:auto;display:flex;align-items:center;gap:8px}
+.eyebrow{
+  font:500 11px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink3);
+}
 
-.conteudo{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+/* ---------------------------- estrutura ---------------------------- */
 
-.btn{background:var(--acento);color:#fff;border:0;border-radius:8px;padding:8px 14px;
-  font-size:14px;cursor:pointer;font-family:inherit}
-.btn:hover{filter:brightness(1.08)}
-.btn-sec{background:var(--painel2);color:var(--texto);border:1px solid var(--borda)}
-.btn-fantasma{background:transparent;color:var(--texto2);border:1px solid var(--borda)}
-.btn-perigo{background:var(--alerta)}
-.btn-mini{padding:3px 8px;font-size:12px;border-radius:6px}
+.aplicativo{display:flex;min-height:100vh}
+
+.lateral{
+  width:var(--lateral);flex:0 0 var(--lateral);background:var(--surface);
+  border-right:1px solid var(--linha);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+}
+.marca{padding:20px 20px 16px;border-bottom:1px solid var(--linha)}
+.marca .nome{font:600 19px/1 var(--serif);letter-spacing:-.01em;display:block}
+.marca .sub{font:400 10px/1.4 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-top:6px;display:block}
+.menu{display:flex;flex-direction:column;gap:2px;padding:12px 10px;overflow-y:auto}
+.menu a{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--raio-p);
+  color:var(--ink2);font-size:14px;font-weight:500;
+}
+.menu a:hover{background:var(--surface2);color:var(--ink);text-decoration:none}
+.menu a.ativo{background:var(--acento-suave);color:var(--acento);font-weight:600}
+.menu a .ic{width:16px;text-align:center;opacity:.85;font-size:13px}
+.lateral-rodape{margin-top:auto;padding:14px;border-top:1px solid var(--linha);display:grid;gap:10px}
+.lateral-rodape .linha{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.lateral-rodape .linha .btn{justify-content:center}
+.lateral-rodape .linha .btn:last-child{grid-column:span 2}
+.usuario-caixa{display:flex;align-items:center;gap:10px}
+.usuario-caixa .quem{min-width:0}
+.usuario-caixa .quem b{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.usuario-caixa .quem span{font:400 10px/1.4 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+
+.conteudo{flex:1;min-width:0;padding:28px 32px 72px;max-width:1240px}
+
+.pagina-topo{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.pagina-topo .titulo-bloco{min-width:0}
+.pagina-topo h1{margin-top:6px}
+.pagina-topo .sub{color:var(--ink2);font-size:14px;margin-top:6px}
+.pagina-topo .acoes{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------------------------- controles ---------------------------- */
+
+.btn{
+  background:var(--acento);color:#fff;border:1px solid transparent;border-radius:var(--raio-p);
+  padding:8px 14px;font:600 13.5px/1.2 var(--sans);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:filter .12s ease,background .12s ease;
+}
+.btn{color:var(--btn-texto)}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:translateY(1px)}
+.btn-sec{background:var(--surface);color:var(--ink);border-color:var(--linha-forte)}
+.btn-sec:hover{background:var(--surface2);filter:none}
+.btn-fantasma{background:transparent;color:var(--ink2);border-color:var(--linha)}
+.btn-fantasma:hover{background:var(--surface2);color:var(--ink);filter:none}
+.btn-perigo{background:var(--erro-suave);color:var(--erro);border-color:transparent}
+.btn-perigo:hover{background:var(--erro);color:var(--surface);filter:none}
+.btn-mini{padding:4px 9px;font-size:12px;border-radius:6px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
 .linha{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .espaco{margin-left:auto}
 
-.cartao{background:var(--painel);border:1px solid var(--borda);border-radius:var(--raio);
-  padding:14px;margin-bottom:14px}
-.grade{display:grid;gap:12px}
-.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+input,select,textarea{
+  width:100%;background:var(--surface);color:var(--ink);
+  border:1px solid var(--linha-forte);border-radius:var(--raio-p);
+  padding:9px 11px;font:400 14px/1.4 var(--sans);
+}
+input:hover,select:hover,textarea:hover{border-color:var(--ink3)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acento);box-shadow:0 0 0 3px var(--acento-suave)}
+textarea{min-height:92px;resize:vertical}
+label{display:block;font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin:0 0 6px}
+.campo{margin-bottom:14px}
+.dica{font-size:12.5px;color:var(--ink3);margin-top:5px}
+
+/* ---------------------------- superfícies ---------------------------- */
+
+.cartao{
+  background:var(--surface);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:18px;box-shadow:var(--sombra);
+}
+.cartao + .cartao{margin-top:16px}
+.cartao h2,.cartao h3{margin-bottom:12px}
+.grade{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
-.g4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.pilha{display:grid;gap:16px}
 
-.kpi{background:var(--painel);border:1px solid var(--borda);border-radius:var(--raio);padding:14px}
-.kpi .n{font-size:28px;font-weight:700}
-.kpi .r{color:var(--texto2);font-size:13px}
-
-input,select,textarea{width:100%;background:var(--painel2);color:var(--texto);
-  border:1px solid var(--borda);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
-textarea{min-height:90px;resize:vertical}
-label{display:block;font-size:12px;color:var(--texto2);margin:0 0 4px}
-.campo{margin-bottom:10px}
+.kpi{
+  background:var(--surface);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:16px 16px 14px;position:relative;overflow:hidden;
+}
+.kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:var(--acento);opacity:.75}
+.kpi.destaque::before{background:var(--latao)}
+.kpi .n{font:600 30px/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .r{color:var(--ink2);font-size:12.5px;margin-top:8px}
 
 table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--borda);vertical-align:top}
-th{color:var(--texto2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
-tr.clicavel:hover{background:var(--painel2);cursor:pointer}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--linha);vertical-align:top}
+th{font:500 10.5px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+tbody tr:last-child td{border-bottom:0}
+tr.clicavel:hover{background:var(--surface2);cursor:pointer}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.rolagem{overflow-x:auto}
 
-.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;
-  background:var(--painel2);border:1px solid var(--borda);color:var(--texto2)}
-.tag-verde{background:rgba(46,163,107,.16);border-color:rgba(46,163,107,.4);color:var(--t-verde)}
-.tag-azul{background:rgba(79,156,249,.16);border-color:rgba(79,156,249,.4);color:var(--t-azul)}
-.tag-amarela{background:rgba(226,168,59,.16);border-color:rgba(226,168,59,.4);color:var(--t-amarelo)}
-.tag-vermelha{background:rgba(224,87,74,.16);border-color:rgba(224,87,74,.4);color:var(--t-vermelho)}
-.tag-cinza{background:var(--painel2)}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;
+  font:500 12px/1.4 var(--sans);background:var(--surface2);border:1px solid var(--linha);color:var(--ink2);
+}
+.tag-verde{background:var(--ok-suave);border-color:transparent;color:var(--ok)}
+.tag-azul{background:var(--acento-suave);border-color:transparent;color:var(--acento)}
+.tag-amarela{background:var(--atencao-suave);border-color:transparent;color:var(--atencao)}
+.tag-vermelha{background:var(--erro-suave);border-color:transparent;color:var(--erro)}
+.tag-latao{background:var(--latao-suave);border-color:transparent;color:var(--latao)}
+.tag-cinza{background:var(--surface2)}
 
-.subtexto{color:var(--texto2);font-size:13px}
-.vazio{color:var(--texto2);text-align:center;padding:28px;border:1px dashed var(--borda);border-radius:var(--raio)}
+.subtexto{color:var(--ink2);font-size:13.5px}
+.vazio{color:var(--ink2);text-align:center;padding:34px 20px;border:1px dashed var(--linha-forte);border-radius:var(--raio)}
 
-/* funil / kanban */
-.funil{display:flex;gap:2px;margin:8px 0;height:10px;border-radius:999px;overflow:hidden;background:var(--painel2)}
+/* iniciais do profissional */
+.avatar{
+  width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;
+  font:600 12px/1 var(--sans);letter-spacing:.02em;
+  background:var(--acento-suave);color:var(--acento);border:1px solid var(--linha);
+}
+.avatar-p{width:26px;height:26px;flex-basis:26px;font-size:10.5px}
+.avatar-g{width:52px;height:52px;flex-basis:52px;font-size:17px}
+
+/* fit em cinco pontos */
+.fit{display:inline-flex;gap:3px;align-items:center}
+.fit i{width:6px;height:6px;border-radius:50%;background:var(--linha-forte);display:block}
+.fit i.on{background:var(--latao)}
+
+/* ---------------------------- funil e pipeline ---------------------------- */
+
+.funil{display:flex;gap:2px;margin:10px 0 2px;height:8px;border-radius:999px;overflow:hidden;background:var(--surface2)}
 .funil span{display:block}
-.kanban{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px}
-.coluna{min-width:230px;flex:1 0 230px;background:var(--painel);border:1px solid var(--borda);
-  border-radius:var(--raio);padding:8px}
-.coluna.destino{outline:2px dashed var(--acento)}
-.coluna h4{display:flex;justify-content:space-between;font-size:13px;color:var(--texto2);margin-bottom:8px}
-.ficha{background:var(--painel2);border:1px solid var(--borda);border-radius:8px;padding:8px;margin-bottom:8px;cursor:grab}
-.ficha strong{display:block;font-size:14px}
-.ficha .sub{font-size:12px;color:var(--texto2)}
-.ficha.parado{border-color:rgba(226,168,59,.6)}
 
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;
-  justify-content:center;padding:24px 12px;z-index:50;overflow:auto}
-.modal-caixa{background:var(--painel);border:1px solid var(--borda);border-radius:12px;
-  width:100%;max-width:760px}
-.modal-topo{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;
-  border-bottom:1px solid var(--borda)}
-.modal-topo h3{margin:0}
-.modal-corpo{padding:16px}
+.kanban{display:flex;gap:12px;overflow-x:auto;padding:4px 4px 14px;scroll-snap-type:x proximity}
+.coluna{
+  min-width:250px;flex:1 0 250px;background:var(--surface);border:1px solid var(--linha);
+  border-radius:var(--raio);padding:10px;scroll-snap-align:start;position:relative;
+}
+.coluna::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;border-radius:var(--raio) var(--raio) 0 0;
+  background:hsl(var(--etapa-h,210) var(--etapa-s) var(--etapa-l))}
+.coluna.destino{border-color:var(--acento);background:var(--acento-suave)}
+.coluna > h4{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 2px 10px}
+.coluna > h4 .qtd{font:600 11px/1 var(--mono);color:var(--ink3)}
+.coluna .nada{font-size:12.5px;color:var(--ink3);padding:6px 2px}
+
+.ficha{
+  background:var(--surface2);border:1px solid var(--linha);border-radius:var(--raio-p);
+  padding:10px;margin-bottom:8px;cursor:grab;display:grid;gap:8px;
+}
+.ficha:hover{border-color:var(--linha-forte)}
+.ficha:active{cursor:grabbing}
+.ficha .quem{display:flex;gap:9px;align-items:flex-start}
+.ficha strong{font-size:13.5px;font-weight:600;display:block;line-height:1.25}
+.ficha .cargo{font-size:12px;color:var(--ink2);margin-top:2px}
+.ficha .rodape{display:flex;align-items:center;gap:8px}
+.ficha .dias{font:500 11px/1 var(--mono);color:var(--ink3);margin-left:auto}
+.ficha.parado{border-color:var(--atencao)}
+.ficha.parado .dias{color:var(--atencao)}
+
+/* ---------------------------- modal, avisos, abas ---------------------------- */
+
+.modal{position:fixed;inset:0;background:rgba(10,16,22,.6);backdrop-filter:blur(2px);
+  display:flex;align-items:flex-start;justify-content:center;padding:32px 14px;z-index:50;overflow:auto}
+.modal-caixa{background:var(--surface);border:1px solid var(--linha);border-radius:var(--raio);
+  width:100%;max-width:780px;box-shadow:0 24px 70px -20px rgba(0,0,0,.5)}
+.modal-topo{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 20px;border-bottom:1px solid var(--linha)}
+.modal-topo h3{font:600 17px/1.2 var(--serif)}
+.modal-corpo{padding:20px}
 .escondido{display:none !important}
 
-.aviso{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--painel);
-  border:1px solid var(--borda);border-radius:8px;padding:10px 16px;z-index:60;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+.aviso{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);
+  color:var(--ground);border-radius:999px;padding:10px 20px;z-index:60;font-size:13.5px;
+  box-shadow:0 10px 30px -10px rgba(0,0,0,.5);max-width:min(520px,92vw);text-align:center}
 
-.abas{display:flex;gap:4px;border-bottom:1px solid var(--borda);margin-bottom:14px;flex-wrap:wrap}
-.abas button{background:none;border:0;color:var(--texto2);padding:8px 12px;cursor:pointer;
-  border-bottom:2px solid transparent;font:inherit}
-.abas button.ativo{color:var(--texto);border-bottom-color:var(--acento)}
+.abas{display:flex;gap:2px;border-bottom:1px solid var(--linha);margin-bottom:18px;flex-wrap:wrap}
+.abas button{background:none;border:0;color:var(--ink2);padding:9px 13px;cursor:pointer;
+  border-bottom:2px solid transparent;font:600 13.5px/1 var(--sans)}
+.abas button.ativo{color:var(--ink);border-bottom-color:var(--acento)}
 
-.timeline{list-style:none;padding:0;margin:0}
-.timeline li{border-left:2px solid var(--borda);padding:0 0 12px 12px;margin-left:6px}
-.timeline li .q{font-size:12px;color:var(--texto2)}
+.timeline{list-style:none;padding:0;margin:0;display:grid;gap:14px}
+.timeline li{border-left:2px solid var(--linha);padding:0 0 0 14px;position:relative}
+.timeline li::before{content:"";position:absolute;left:-5px;top:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--surface);border:2px solid var(--linha-forte)}
+.timeline li .q{font:400 11px/1.4 var(--mono);letter-spacing:.06em;color:var(--ink3);margin-top:4px}
 
-.relatorio{background:#fff;color:#111;padding:28px;border-radius:var(--raio)}
-.relatorio h1,.relatorio h2,.relatorio h3{color:#111}
-.relatorio table th{color:#555}
-.relatorio table th,.relatorio table td{border-bottom:1px solid #ddd}
-.relatorio .subtexto{color:#555}
-.relatorio .tag{background:#eee;border-color:#ddd;color:#333}
+/* ---------------------------- tela de acesso ---------------------------- */
 
-@media print{
-  .topo,.abas,.nao-imprime{display:none !important}
-  body{background:#fff}
-  .conteudo{max-width:none;padding:0}
-  .relatorio{padding:0}
+.acesso{min-height:100vh;display:grid;place-items:center;padding:28px 16px;
+  background:
+    radial-gradient(120% 90% at 8% 0%, var(--acento-suave) 0%, transparent 55%),
+    var(--ground)}
+.acesso-caixa{width:100%;max-width:400px}
+.acesso-marca{margin-bottom:22px}
+.acesso-marca .nome{font:600 30px/1.1 var(--serif);letter-spacing:-.015em;display:block}
+.acesso-marca .sub{font:400 10.5px/1.5 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);margin-top:8px;display:block}
+.acesso-cartao{background:var(--surface);border:1px solid var(--linha);border-radius:var(--raio);
+  padding:24px;box-shadow:var(--sombra)}
+.acesso-erro{background:var(--erro-suave);color:var(--erro);border-radius:var(--raio-p);
+  padding:9px 12px;font-size:13px;margin-bottom:14px}
+.acesso-nota{margin-top:16px;font-size:12.5px;color:var(--ink3);line-height:1.55}
+
+/* ---------------------------- relatório impresso ---------------------------- */
+
+.relatorio{background:#fff;color:#101820;padding:36px 40px;border-radius:var(--raio);
+  border:1px solid var(--linha);font-size:14px}
+.relatorio h1{font:600 25px/1.2 var(--serif);color:#101820;margin-bottom:4px}
+.relatorio h2{font:600 15px/1.3 var(--sans);letter-spacing:.02em;color:#101820;
+  margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid #e3e8ee}
+.relatorio table th{color:#6a7684;border-bottom:1px solid #e3e8ee}
+.relatorio table td{border-bottom:1px solid #eef1f5}
+.relatorio .subtexto{color:#5a6675}
+.relatorio .tag{background:#f1f4f8;border-color:#e3e8ee;color:#3c4a59}
+.relatorio ul{margin:0;padding-left:18px}
+.relatorio li{margin-bottom:8px}
+.relatorio .fit i{background:#dde3ea}
+.relatorio .fit i.on{background:#a9761f}
+
+/* ---------------------------- responsivo e impressão ---------------------------- */
+
+@media (max-width:860px){
+  .aplicativo{flex-direction:column}
+  .lateral{width:100%;flex:none;height:auto;position:sticky;top:0;z-index:30;
+    border-right:0;border-bottom:1px solid var(--linha)}
+  .marca{padding:12px 16px;border-bottom:0}
+  .marca .sub{display:none}
+  .menu{flex-direction:row;overflow-x:auto;padding:0 10px 10px}
+  .menu a{white-space:nowrap}
+  .lateral-rodape{border-top:1px solid var(--linha);padding:10px 16px}
+  .conteudo{padding:20px 16px 60px}
+  h1{font-size:23px}
 }
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+}
+@media print{
+  .lateral,.abas,.nao-imprime,.aviso{display:none !important}
+  body{background:#fff}
+  .aplicativo{display:block}
+  .conteudo{max-width:none;padding:0}
+  .relatorio{padding:0;border:0}
+}
+
+/* ---------------------------- listas de linhas e marcações ---------------------------- */
+
+.repetidor{display:grid;gap:8px}
+.repetidor-linha,.contato-linha{display:flex;gap:8px;align-items:center}
+.repetidor-linha input,.repetidor-linha select,
+.contato-linha input{flex:1 1 120px;min-width:0}
+.repetidor-linha select,.contato-linha select{flex:0 1 170px}
+.repetidor-linha .btn,.contato-linha .btn{flex:0 0 auto}
+
+.caixa-marcas{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px 14px;
+  border:1px solid var(--linha);border-radius:var(--raio-p);padding:12px;background:var(--surface2);
+}
+.marcador{display:flex;align-items:center;gap:8px;font:400 13.5px/1.3 var(--sans);
+  color:var(--ink);text-transform:none;letter-spacing:0;margin:0}
+.marcador input{width:auto;flex:0 0 auto;accent-color:var(--acento)}
+
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.lista-simples{margin:8px 0 0;padding-left:18px;color:var(--ink2);font-size:13.5px}
+.lista-simples li{margin-bottom:5px}
+
+.busca{
+  display:block;background:var(--surface2);border:1px solid var(--linha);border-radius:var(--raio-p);
+  padding:12px 14px;font:400 13px/1.6 var(--mono);color:var(--ink);word-break:break-word;
+}
+
+.bloco-dobra{border:1px solid var(--linha);border-radius:var(--raio-p);padding:12px 14px;margin-bottom:14px;
+  background:var(--surface)}
+.bloco-dobra > summary{cursor:pointer;font:600 13.5px/1.3 var(--sans);color:var(--ink);list-style:none}
+.bloco-dobra > summary::-webkit-details-marker{display:none}
+.bloco-dobra > summary::before{content:"▸ ";color:var(--ink3)}
+.bloco-dobra[open] > summary::before{content:"▾ "}
+
+.abas button{white-space:nowrap}
 
 </style>
 </head>
 <body>
-<header class="topo">
-  <div class="marca">🧭 <strong>Recrutamento</strong></div>
-  <nav class="menu">
-    <a href="#/painel" data-rota="painel">Painel</a>
-    <a href="#/assignments" data-rota="assignments">Assignments</a>
-    <a href="#/candidatos" data-rota="candidatos">Candidatos</a>
-    <a href="#/clientes" data-rota="clientes">Clientes</a>
-    <a href="#/relatorios" data-rota="relatorios">Relatórios</a>
-  </nav>
-  <div class="topo-dir">
-    <span id="aviso-modo" class="tag tag-cinza" title=""></span>
-    <button class="btn btn-fantasma" id="btn-backup">Backup</button>
-  </div>
-</header>
 
-<main id="app" class="conteudo"></main>
+<!-- ---------------------------- acesso ---------------------------- -->
+<div id="acesso" class="acesso escondido">
+  <div class="acesso-caixa">
+    <div class="acesso-marca">
+      <span class="nome">Recrutamento</span>
+      <span class="sub">Executive search · busca e seleção</span>
+    </div>
+    <div class="acesso-cartao">
+      <div id="acesso-erro" class="acesso-erro escondido"></div>
+      <form id="form-acesso">
+        <div class="campo">
+          <label for="ac-email">Usuário</label>
+          <input id="ac-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </div>
+        <div class="campo">
+          <label for="ac-senha">Senha</label>
+          <input id="ac-senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn" type="submit" style="width:100%;justify-content:center">Entrar</button>
+      </form>
+      <div id="acesso-nota" class="acesso-nota"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ---------------------------- aplicativo ---------------------------- -->
+<div id="aplicativo" class="aplicativo escondido">
+  <aside class="lateral">
+    <div class="marca">
+      <span class="nome">Recrutamento</span>
+      <span class="sub">Executive search</span>
+    </div>
+    <nav class="menu">
+      <a href="#/painel" data-rota="painel"><span class="ic">◆</span> Painel</a>
+      <a href="#/assignments" data-rota="assignments"><span class="ic">▤</span> Assignments</a>
+      <a href="#/candidatos" data-rota="candidatos"><span class="ic">◎</span> Profissionais</a>
+      <a href="#/clientes" data-rota="clientes"><span class="ic">▣</span> Clientes</a>
+      <a href="#/relatorios" data-rota="relatorios"><span class="ic">▧</span> Relatórios</a>
+      <a href="#/usuarios" data-rota="usuarios" id="menu-usuarios"><span class="ic">◍</span> Usuários</a>
+      <a href="#/configuracoes" data-rota="configuracoes" id="menu-configuracoes"><span class="ic">⚙</span> Configurações</a>
+    </nav>
+    <div class="lateral-rodape">
+      <div class="usuario-caixa">
+        <div class="avatar avatar-p" id="eu-avatar">—</div>
+        <div class="quem">
+          <b id="eu-nome">—</b>
+          <span id="eu-papel"></span>
+        </div>
+      </div>
+      <div class="linha">
+        <button class="btn btn-fantasma btn-mini" id="btn-conta">Minha conta</button>
+        <button class="btn btn-fantasma btn-mini" id="btn-backup">Backup</button>
+        <button class="btn btn-fantasma btn-mini" id="btn-sair">Sair</button>
+      </div>
+      <span class="tag tag-cinza" id="aviso-modo" title="" style="justify-content:center"></span>
+    </div>
+  </aside>
+
+  <main id="app" class="conteudo"></main>
+</div>
 
 <div id="modal" class="modal escondido">
   <div class="modal-caixa">
     <div class="modal-topo">
       <h3 id="modal-titulo"></h3>
-      <button class="btn btn-fantasma" id="modal-fechar">✕</button>
+      <button class="btn btn-fantasma btn-mini" id="modal-fechar" aria-label="Fechar">✕</button>
     </div>
     <div id="modal-corpo" class="modal-corpo"></div>
   </div>
@@ -193,7 +471,82 @@ let modoLocal = false;   // true = sem servidor, guardando no navegador
 let salvando = null;
 
 function baseVazia() {
-  return { versao: 1, candidatos: [], clientes: [], assignments: [], atividades: [] };
+  return {
+    versao: 1, candidatos: [], clientes: [], assignments: [], atividades: [], usuarios: [],
+    configuracao: null
+  };
+}
+
+/** Processo de seleção que vem de fábrica; dá para editar e criar outros. */
+function configuracaoPadrao() {
+  return {
+    moeda: 'R$',
+    processos: [
+      { id: 'padrao', nome: 'Executive search (padrão)', etapas: ETAPAS_PADRAO.slice() },
+      { id: 'expresso', nome: 'Busca expressa (3 etapas)', etapas: ['Mapeado', 'Entrevista consultor', 'Entrevista cliente'] }
+    ],
+    processoPadraoId: 'padrao',
+    beneficios: ['Plano de saúde', 'Plano odontológico', 'Previdência privada', 'Vale refeição',
+      'Carro / auxílio combustível', 'Seguro de vida', 'PLR', 'Stock options', 'Bônus de contratação',
+      'Auxílio moradia', 'Auxílio educação']
+  };
+}
+
+const NIVEIS_IDIOMA = ['Básico', 'Intermediário', 'Avançado', 'Fluente', 'Nativo'];
+const NIVEIS_FORMACAO = ['Técnico', 'Graduação', 'Pós-graduação', 'MBA', 'Mestrado', 'Doutorado'];
+
+/**
+ * Ajusta bases antigas ao formato atual: contatos do cliente viraram lista,
+ * a faixa salarial virou pacote estruturado e o job spec ganhou campos.
+ */
+function migrarBase() {
+  if (!base.configuracao) base.configuracao = configuracaoPadrao();
+  const cfg = base.configuracao;
+  if (!cfg.processos || !cfg.processos.length) Object.assign(cfg, configuracaoPadrao());
+  if (!cfg.beneficios) cfg.beneficios = configuracaoPadrao().beneficios;
+  if (!cfg.moeda) cfg.moeda = 'R$';
+
+  (base.clientes || []).forEach((c) => {
+    if (!Array.isArray(c.contatos)) {
+      c.contatos = [];
+      if (c.contatoNome || c.contatoEmail) {
+        c.contatos.push({ id: uid(), nome: c.contatoNome || '', cargo: '', email: c.contatoEmail || '', telefone: '' });
+      }
+      delete c.contatoNome; delete c.contatoEmail;
+    }
+  });
+
+  (base.assignments || []).forEach((a) => {
+    if (!a.pacote) {
+      a.pacote = pacoteVazio();
+      if (a.faixaSalarial) a.pacote.observacao = a.faixaSalarial;
+    }
+    if (!a.jobSpec) {
+      a.jobSpec = jobSpecVazio();
+      if (a.descricao) a.jobSpec.missao = a.descricao;
+      if (a.cargo) a.jobSpec.titulosAlvo = [a.cargo];
+      if (a.localizacao) a.jobSpec.localizacoes = [a.localizacao];
+    }
+    if (!a.consultorId && a.consultor) {
+      const achado = (base.usuarios || []).find((u) => u.nome === a.consultor);
+      if (achado) a.consultorId = achado.id;
+    }
+    if (!a.processoId) a.processoId = cfg.processoPadraoId;
+  });
+}
+
+function pacoteVazio() {
+  return {
+    fixoMensal: '', fixoAnual: '', bonusTipo: 'percentual', bonusValor: '', bonusDescricao: '',
+    beneficios: [], outros: '', observacao: ''
+  };
+}
+
+function jobSpecVazio() {
+  return {
+    missao: '', entregas: [], competencias: [], titulosAlvo: [], empresasAlvo: [], empresasEvitar: [],
+    formacao: [], idiomas: [], localizacoes: [], observacoes: ''
+  };
 }
 
 /* ---------------------------- utilidades ---------------------------- */
@@ -279,23 +632,23 @@ function csv(linhas) {
 
 /* ---------------------------- persistência ---------------------------- */
 
+function carregarLocal() {
+  try { base = Object.assign(baseVazia(), JSON.parse(localStorage.getItem('recrut.base') || 'null') || {}); }
+  catch (_) { base = baseVazia(); }
+}
+
 async function carregar() {
-  try {
-    // Arquivo local (file://) e versão online não têm servidor para conversar.
-    if (location.protocol === 'file:' || window.RECRUTAMENTO_ONLINE) throw new Error('sem servidor');
-    const r = await fetch('api/base', { cache: 'no-store' });
-    if (!r.ok) throw new Error('sem api');
-    base = Object.assign(baseVazia(), await r.json());
-    modoLocal = false;
-  } catch (e) {
-    modoLocal = true;
-    try { base = Object.assign(baseVazia(), JSON.parse(localStorage.getItem('recrut.base') || 'null') || {}); }
-    catch (_) { base = baseVazia(); }
-  }
+  if (modoLocal) { carregarLocal(); migrarBase(); marcarModo(); return; }
+  const r = await fetch('api/base', { cache: 'no-store' });
+  if (r.status === 401) { eu = null; mostrarAcesso(); throw new Error('sem sessão'); }
+  if (!r.ok) throw new Error('não consegui ler a base');
+  base = Object.assign(baseVazia(), await r.json());
+  migrarBase();
   marcarModo();
 }
 
 function salvar() {
+  if (!podeEditar()) { aviso('Seu acesso é somente leitura.'); return; }
   clearTimeout(salvando);
   salvando = setTimeout(async () => {
     if (modoLocal) {
@@ -310,9 +663,16 @@ function salvar() {
         body: JSON.stringify(base)
       });
       if (r.status === 409) {
-        aviso('Outra pessoa gravou antes. Recarregando a base…', 5000);
-        await carregar();
-        render();
+        // Alguém gravou entre a leitura e agora. Não dá para perder o que a
+        // pessoa acabou de fazer: reenvia por cima, avisando.
+        const conflito = await r.json().catch(() => ({}));
+        base.versao = conflito.versaoAtual || base.versao;
+        const r2 = await fetch('api/base', {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(base)
+        });
+        const resp2 = await r2.json().catch(() => ({}));
+        if (resp2 && resp2.versao) base.versao = resp2.versao;
+        aviso('Outra pessoa gravou ao mesmo tempo — suas alterações foram aplicadas por cima.', 6000);
         return;
       }
       const resp = await r.json();
@@ -523,6 +883,21 @@ function ligarAcoes(raiz) {
 
 function ir(hash) { location.hash = hash; }
 
+/** Cabeçalho padrão: eyebrow em mono, título em serifa, ações à direita. */
+function cabecalho(eyebrow, titulo, sub, botoes) {
+  return `<header class="pagina-topo">
+    <div class="titulo-bloco">
+      <div class="eyebrow">${esc(eyebrow)}</div>
+      <h1>${esc(titulo)}</h1>
+      ${sub ? `<div class="sub">${sub}</div>` : ''}
+    </div>
+    ${botoes ? `<div class="acoes nao-imprime">${botoes}</div>` : ''}
+  </header>`;
+}
+
+/** Botão que some para quem tem acesso só de leitura. */
+function seEdita(html) { return podeEditar() ? html : ''; }
+
 function render() {
   const rota = (location.hash || '#/painel').slice(1);
   const partes = rota.split('/').filter(Boolean);
@@ -540,6 +915,8 @@ function render() {
   else if (tela === 'candidato') html = telaCandidato(arg);
   else if (tela === 'clientes') html = telaClientes();
   else if (tela === 'relatorios') html = telaRelatorios();
+  else if (tela === 'usuarios') html = telaUsuarios();
+  else if (tela === 'configuracoes') html = telaConfiguracoes();
   else if (tela === 'relatorio') html = arg === 'assignment' ? relatorioAssignment(arg2) : relatorioCandidato(arg2);
   else html = telaPainel();
 
@@ -573,12 +950,13 @@ function contagemPorEtapa(a) {
 function barraFunil(a) {
   const mapa = contagemPorEtapa(a);
   const total = Object.values(mapa).reduce((s, n) => s + n, 0) || 1;
-  const cores = ['#4f9cf9', '#5aa9e6', '#69b3a2', '#8bbf6e', '#c8b34b', '#e2a83b', '#2ea36b'];
   const etapas = etapasDe(a);
   const pedacos = etapas.map((e, i) => {
     const n = mapa[e] || 0;
     if (!n) return '';
-    return `<span title="${esc(e)}: ${n}" style="width:${(n / total) * 100}%;background:${cores[i % cores.length]}"></span>`;
+    // Mesma rampa das colunas do pipeline: a matiz mostra o quanto avançou.
+    const matiz = Math.round(214 - (i / Math.max(1, etapas.length - 1)) * 66);
+    return `<span title="${esc(e)}: ${n}" style="width:${(n / total) * 100}%;background:hsl(${matiz} var(--etapa-s) var(--etapa-l))"></span>`;
   }).join('');
   return `<div class="funil">${pedacos}</div>`;
 }
@@ -607,9 +985,9 @@ function telaPainel() {
     return `<tr class="clicavel" data-acao="abrirAssignment" data-id="${a.id}">
       <td><strong>${esc(a.titulo)}</strong><div class="subtexto">${esc(nomeCliente(a.clienteId))}</div></td>
       <td>${esc(a.consultor || '—')}</td>
-      <td>${total}${barraFunil(a)}</td>
-      <td>${dias == null ? '—' : dias + ' d'}</td>
-      <td>${a.prazoAlvo ? fmtData(a.prazoAlvo) : '—'}</td>
+      <td style="min-width:150px">${total}${barraFunil(a)}</td>
+      <td class="num">${dias == null ? '—' : dias + ' d'}</td>
+      <td class="num">${a.prazoAlvo ? fmtData(a.prazoAlvo) : '—'}</td>
     </tr>`;
   }).join('');
 
@@ -618,37 +996,38 @@ function telaPainel() {
 
   const primeiraVez = !base.assignments.length && !base.candidatos.length && !base.clientes.length;
 
+  const primeiroNome = (eu && eu.nome || '').split(' ')[0];
+
   return `
-  ${primeiraVez ? `<div class="cartao" style="border-color:var(--acento)">
-    <h2>Primeira vez por aqui?</h2>
-    <p class="subtexto">Carregue um cliente, um assignment e três profissionais fictícios para
-    entender o fluxo — depois é só apagar e começar com os seus dados.</p>
-    <div class="linha">
+  ${cabecalho('Visão geral', 'Painel',
+    `Bom trabalho, ${esc(primeiroNome)}. ${abertos.length} busca${abertos.length === 1 ? '' : 's'} em andamento.`,
+    seEdita(`<button class="btn" data-acao="novoAssignment">+ Novo assignment</button>
+      <button class="btn btn-sec" data-acao="novoCandidatoLinkedIn">+ Profissional</button>`))}
+
+  ${primeiraVez ? `<div class="cartao" style="margin-bottom:16px">
+    <div class="eyebrow" style="margin-bottom:8px">Primeira vez por aqui</div>
+    <h2>Comece com um exemplo</h2>
+    <p class="subtexto">Um cliente, um assignment e três profissionais fictícios, para você entender o
+    fluxo antes de cadastrar os seus.</p>
+    <div class="linha" style="margin-top:14px">
       <button class="btn" data-acao="carregarExemplo">Carregar dados de exemplo</button>
       <button class="btn btn-sec" data-acao="novoAssignment">Começar do zero</button>
     </div></div>` : ''}
 
-  <div class="linha" style="margin-bottom:14px">
-    <h1>Painel</h1>
-    <div class="espaco"></div>
-    <button class="btn" data-acao="novoAssignment">+ Novo assignment</button>
-    <button class="btn btn-sec" data-acao="novoCandidatoLinkedIn">+ Candidato (LinkedIn)</button>
-  </div>
-
-  <div class="grade g4" style="margin-bottom:16px">
+  <div class="grade g4" style="margin-bottom:18px">
     <div class="kpi"><div class="n">${abertos.length}</div><div class="r">assignments abertos</div></div>
     <div class="kpi"><div class="n">${base.candidatos.length}</div><div class="r">profissionais no banco</div></div>
     <div class="kpi"><div class="n">${emProcesso}</div><div class="r">em processo ativo</div></div>
-    <div class="kpi"><div class="n">${contratados}</div><div class="r">contratados</div></div>
+    <div class="kpi destaque"><div class="n">${contratados}</div><div class="r">contratados</div></div>
   </div>
 
   <div class="cartao">
     <h2>Assignments abertos</h2>
-    ${abertos.length ? `<table><thead><tr><th>Posição</th><th>Consultor</th><th>Pipeline</th><th>Em aberto</th><th>Prazo</th></tr></thead><tbody>${linhasAssign}</tbody></table>`
-      : '<div class="vazio">Nenhum assignment aberto. Comece criando um.</div>'}
+    ${abertos.length ? `<div class="rolagem"><table><thead><tr><th>Posição</th><th>Consultor</th><th>Pipeline</th><th>Em aberto</th><th>Prazo</th></tr></thead><tbody>${linhasAssign}</tbody></table></div>`
+      : '<div class="vazio">Nenhum assignment aberto.</div>'}
   </div>
 
-  <div class="grade g2">
+  <div class="grade g2" style="margin-top:16px">
     <div class="cartao">
       <h2>Precisa de atenção <span class="tag tag-amarela">${parados.length}</span></h2>
       <div class="subtexto" style="margin-bottom:8px">Candidatos parados há ${DIAS_PARADO} dias ou mais na mesma etapa.</div>
@@ -664,6 +1043,243 @@ function telaPainel() {
       ${atividades ? `<ul class="timeline">${atividades}</ul>` : '<div class="subtexto">Sem movimentações ainda.</div>'}
     </div>
   </div>`;
+}
+
+/* ---------------------------- repetidores (listas de linhas) ---------------------------- */
+
+const REPETIDORES = {};   // id do container -> definição dos campos
+
+function linhaRepetidor(campos, valores) {
+  valores = valores || {};
+  const celulas = campos.map((c) => {
+    if (c.tipo === 'select') {
+      return `<select data-campo="${c.campo}" title="${esc(c.rotulo || c.campo)}">
+        ${(c.opcoes || []).map((o) => `<option ${o === valores[c.campo] ? 'selected' : ''}>${esc(o)}</option>`).join('')}
+      </select>`;
+    }
+    return `<input data-campo="${c.campo}" placeholder="${esc(c.placeholder || c.rotulo || '')}"
+      value="${esc(valores[c.campo] || '')}"${c.largura ? ` style="flex:${c.largura}"` : ''}>`;
+  }).join('');
+  return `<div class="repetidor-linha">${celulas}
+    <button class="btn btn-fantasma btn-mini" data-acao="removerLinha" title="Remover">✕</button></div>`;
+}
+
+function repetidor(id, campos, itens, textoBotao) {
+  REPETIDORES[id] = campos;
+  const linhas = (itens && itens.length ? itens : [{}]).map((v) => linhaRepetidor(campos, v)).join('');
+  return `<div class="repetidor" id="${id}">${linhas}</div>
+    <button class="btn btn-sec btn-mini" style="margin-top:8px" data-acao="addLinha" data-alvo="${id}">${esc(textoBotao)}</button>`;
+}
+
+acoes.addLinha = (el, d) => {
+  const caixa = $('#' + d.alvo);
+  caixa.insertAdjacentHTML('beforeend', linhaRepetidor(REPETIDORES[d.alvo], {}));
+  ligarAcoes(caixa);
+  const novo = caixa.lastElementChild.querySelector('input,select');
+  if (novo) novo.focus();
+};
+
+function lerRepetidor(id) {
+  const campos = REPETIDORES[id] || [];
+  return $$('#' + id + ' .repetidor-linha').map((linha) => {
+    const item = {};
+    campos.forEach((c) => {
+      const el = linha.querySelector(`[data-campo="${c.campo}"]`);
+      item[c.campo] = el ? el.value.trim() : '';
+    });
+    return item;
+  }).filter((item) => Object.values(item).some((v) => v));
+}
+
+const porVirgula = (texto) => String(texto || '').split(',').map((t) => t.trim()).filter(Boolean);
+const porLinha = (texto) => String(texto || '').split('\n').map((t) => t.trim()).filter(Boolean);
+
+/* ---------------------------- job spec ---------------------------- */
+
+const CAMPOS_COMPETENCIA = [
+  { campo: 'nome', placeholder: 'Competência / experiência (ex.: canal indireto)', largura: '3' },
+  { campo: 'tipo', tipo: 'select', opcoes: ['Obrigatória', 'Desejável'] },
+  { campo: 'anos', placeholder: 'Anos', largura: '0 0 80px' }
+];
+const CAMPOS_FORMACAO = [
+  { campo: 'curso', placeholder: 'Curso (ex.: Engenharia de Produção)', largura: '3' },
+  { campo: 'instituicao', placeholder: 'Onde estudou (ex.: USP, FGV)', largura: '2' },
+  { campo: 'nivel', tipo: 'select', opcoes: NIVEIS_FORMACAO },
+  { campo: 'exigencia', tipo: 'select', opcoes: ['Obrigatória', 'Desejável'] }
+];
+const CAMPOS_IDIOMA = [
+  { campo: 'idioma', placeholder: 'Idioma', largura: '2' },
+  { campo: 'nivel', tipo: 'select', opcoes: NIVEIS_IDIOMA },
+  { campo: 'exigencia', tipo: 'select', opcoes: ['Obrigatório', 'Desejável'] }
+];
+
+function camposJobSpec(js) {
+  js = Object.assign(jobSpecVazio(), js || {});
+  return `
+  <div class="campo"><label>Missão da posição</label>
+    <textarea id="js-missao" placeholder="Por que a posição existe, a quem reporta, que time lidera">${esc(js.missao || '')}</textarea></div>
+  <div class="campo"><label>Entregas esperadas (uma por linha)</label>
+    <textarea id="js-entregas" placeholder="Ex.: dobrar a receita do canal indireto em 24 meses">${esc((js.entregas || []).join('\n'))}</textarea></div>
+
+  <div class="campo"><label>Competências e experiências</label>
+    ${repetidor('js-competencias', CAMPOS_COMPETENCIA, js.competencias, '+ Competência')}
+    <div class="dica">O que estiver como <strong>obrigatória</strong> entra na busca do LinkedIn como filtro
+      obrigatório; as desejáveis entram como alternativas.</div></div>
+
+  <div class="campo"><label>Formação</label>
+    ${repetidor('js-formacao', CAMPOS_FORMACAO, js.formacao, '+ Formação')}</div>
+
+  <div class="campo"><label>Idiomas</label>
+    ${repetidor('js-idiomas', CAMPOS_IDIOMA, js.idiomas, '+ Idioma')}</div>
+
+  <div class="grade g2">
+    <div class="campo"><label>Títulos de cargo a procurar</label>
+      <input id="js-titulos" value="${esc((js.titulosAlvo || []).join(', '))}"
+        placeholder="Diretor Comercial, Head of Sales, VP Vendas">
+      <div class="dica">Separe por vírgula. É o primeiro bloco da busca no LinkedIn.</div></div>
+    <div class="campo"><label>Praças / localizações</label>
+      <input id="js-locais" value="${esc((js.localizacoes || []).join(', '))}" placeholder="São Paulo, Campinas"></div>
+    <div class="campo"><label>Empresas-alvo (de onde vir)</label>
+      <input id="js-empresas" value="${esc((js.empresasAlvo || []).join(', '))}" placeholder="Concorrentes e referências do setor"></div>
+    <div class="campo"><label>Empresas a evitar (off-limits)</label>
+      <input id="js-evitar" value="${esc((js.empresasEvitar || []).join(', '))}" placeholder="O próprio cliente, parceiros"></div>
+  </div>
+  <div class="campo"><label>Outras observações do job spec</label>
+    <textarea id="js-obs">${esc(js.observacoes || '')}</textarea></div>`;
+}
+
+function lerJobSpec() {
+  return {
+    missao: $('#js-missao').value,
+    entregas: porLinha($('#js-entregas').value),
+    competencias: lerRepetidor('js-competencias'),
+    formacao: lerRepetidor('js-formacao'),
+    idiomas: lerRepetidor('js-idiomas'),
+    titulosAlvo: porVirgula($('#js-titulos').value),
+    localizacoes: porVirgula($('#js-locais').value),
+    empresasAlvo: porVirgula($('#js-empresas').value),
+    empresasEvitar: porVirgula($('#js-evitar').value),
+    observacoes: $('#js-obs').value
+  };
+}
+
+/**
+ * Monta a busca booleana para o LinkedIn a partir do job spec:
+ * títulos e obrigatórias entram com E, desejáveis entram como um bloco OU,
+ * e as empresas off-limits saem com NOT.
+ */
+function buscaBooleana(a) {
+  const js = a.jobSpec || {};
+  const grupo = (lista) => {
+    const itens = (lista || []).map((t) => String(t).trim()).filter(Boolean)
+      .map((t) => (/\s/.test(t) ? `"${t}"` : t));
+    if (!itens.length) return '';
+    return itens.length === 1 ? itens[0] : '(' + itens.join(' OR ') + ')';
+  };
+  const blocos = [];
+  const titulos = grupo(js.titulosAlvo && js.titulosAlvo.length ? js.titulosAlvo : [a.cargo].filter(Boolean));
+  if (titulos) blocos.push(titulos);
+  (js.competencias || []).filter((c) => c.tipo !== 'Desejável' && c.nome).forEach((c) => {
+    blocos.push(grupo([c.nome]));
+  });
+  const desejaveis = (js.competencias || []).filter((c) => c.tipo === 'Desejável' && c.nome).map((c) => c.nome);
+  if (desejaveis.length) blocos.push(grupo(desejaveis));
+  const empresas = grupo(js.empresasAlvo);
+  if (empresas) blocos.push(empresas);
+  let busca = blocos.filter(Boolean).join(' AND ');
+  const evitar = (js.empresasEvitar || []).filter(Boolean);
+  if (evitar.length && busca) busca += ' NOT ' + grupo(evitar);
+  return busca;
+}
+
+function linkBuscaLinkedIn(a) {
+  const busca = buscaBooleana(a);
+  if (!busca) return '';
+  return 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(busca);
+}
+
+/* ---------------------------- pacote de remuneração ---------------------------- */
+
+const TIPOS_BONUS = {
+  nenhum: 'Sem bônus',
+  percentual: '% do salário',
+  valor: 'Valor fixo',
+  meses: 'Salários (nº de meses)'
+};
+
+/** Campos do pacote. O prefixo permite ter dois formulários na mesma tela. */
+function camposPacote(pacote, prefixo) {
+  const p = Object.assign(pacoteVazio(), pacote || {});
+  const moeda = (base.configuracao || {}).moeda || 'R$';
+  const beneficios = ((base.configuracao || {}).beneficios || []);
+  const marcados = new Set(p.beneficios || []);
+  const extras = (p.beneficios || []).filter((b) => !beneficios.includes(b));
+  return `
+  <div class="grade g3">
+    <div class="campo"><label>Fixo mensal (${esc(moeda)})</label>
+      <input id="${prefixo}-fixo-mes" inputmode="decimal" value="${esc(p.fixoMensal || '')}" placeholder="ex.: 45.000"></div>
+    <div class="campo"><label>Fixo anual (${esc(moeda)})</label>
+      <input id="${prefixo}-fixo-ano" inputmode="decimal" value="${esc(p.fixoAnual || '')}" placeholder="ex.: 585.000"></div>
+    <div class="campo"><label>Tipo de bônus</label>
+      <select id="${prefixo}-bonus-tipo">
+        ${Object.keys(TIPOS_BONUS).map((k) => `<option value="${k}" ${k === (p.bonusTipo || 'percentual') ? 'selected' : ''}>${esc(TIPOS_BONUS[k])}</option>`).join('')}
+      </select></div>
+    <div class="campo"><label>Bônus (valor / % / meses)</label>
+      <input id="${prefixo}-bonus-valor" value="${esc(p.bonusValor || '')}" placeholder="ex.: 40"></div>
+    <div class="campo" style="grid-column:span 2"><label>Regra do bônus</label>
+      <input id="${prefixo}-bonus-desc" value="${esc(p.bonusDescricao || '')}" placeholder="ex.: 60% metas da companhia, 40% individuais, pago em março"></div>
+  </div>
+  <div class="campo">
+    <label>Benefícios</label>
+    <div class="caixa-marcas" id="${prefixo}-beneficios">
+      ${beneficios.map((b) => `<label class="marcador"><input type="checkbox" value="${esc(b)}" ${marcados.has(b) ? 'checked' : ''}> ${esc(b)}</label>`).join('')}
+    </div>
+    <input id="${prefixo}-beneficios-extra" style="margin-top:8px" value="${esc(extras.join(', '))}"
+      placeholder="Outros benefícios, separados por vírgula">
+  </div>
+  <div class="grade g2">
+    <div class="campo"><label>Participação / long term (opcional)</label>
+      <input id="${prefixo}-outros" value="${esc(p.outros || '')}" placeholder="ex.: stock options com vesting de 4 anos"></div>
+    <div class="campo"><label>Observação sobre o pacote</label>
+      <input id="${prefixo}-obs" value="${esc(p.observacao || '')}"></div>
+  </div>`;
+}
+
+function lerPacote(prefixo) {
+  const marcados = $$(`#${prefixo}-beneficios input:checked`).map((i) => i.value);
+  const extras = ($(`#${prefixo}-beneficios-extra`).value || '').split(',').map((t) => t.trim()).filter(Boolean);
+  return {
+    fixoMensal: $(`#${prefixo}-fixo-mes`).value.trim(),
+    fixoAnual: $(`#${prefixo}-fixo-ano`).value.trim(),
+    bonusTipo: $(`#${prefixo}-bonus-tipo`).value,
+    bonusValor: $(`#${prefixo}-bonus-valor`).value.trim(),
+    bonusDescricao: $(`#${prefixo}-bonus-desc`).value.trim(),
+    beneficios: marcados.concat(extras),
+    outros: $(`#${prefixo}-outros`).value.trim(),
+    observacao: $(`#${prefixo}-obs`).value.trim()
+  };
+}
+
+/** Pacote em uma linha, para listas e relatórios. */
+function resumoPacote(p) {
+  if (!p) return '';
+  const moeda = (base.configuracao || {}).moeda || 'R$';
+  const partes = [];
+  if (p.fixoMensal) partes.push(`${moeda} ${p.fixoMensal}/mês`);
+  else if (p.fixoAnual) partes.push(`${moeda} ${p.fixoAnual}/ano`);
+  if (p.bonusValor && p.bonusTipo !== 'nenhum') {
+    if (p.bonusTipo === 'percentual') partes.push(`bônus ${p.bonusValor}%`);
+    else if (p.bonusTipo === 'meses') partes.push(`bônus ${p.bonusValor} salários`);
+    else partes.push(`bônus ${moeda} ${p.bonusValor}`);
+  }
+  if ((p.beneficios || []).length) partes.push(`${p.beneficios.length} benefícios`);
+  if (!partes.length && p.observacao) return p.observacao;
+  return partes.join(' · ');
+}
+
+function pacotePreenchido(p) {
+  if (!p) return false;
+  return !!(p.fixoMensal || p.fixoAnual || p.bonusValor || (p.beneficios || []).length || p.outros || p.observacao);
 }
 
 /* ---------------------------- assignments ---------------------------- */
@@ -684,65 +1300,160 @@ function telaAssignments() {
       <td><strong>${esc(a.titulo)}</strong><div class="subtexto">${esc(a.cargo || '')} ${a.localizacao ? '· ' + esc(a.localizacao) : ''}</div></td>
       <td>${esc(nomeCliente(a.clienteId))}</td>
       <td><span class="tag ${a.status === 'Aberto' ? 'tag-azul' : a.status === 'Concluído' ? 'tag-verde' : 'tag-cinza'}">${esc(a.status)}</span></td>
-      <td>${ativos} ativos / ${(a.candidatos || []).length} no total ${barraFunil(a)}</td>
-      <td>${fmtData(a.abertoEm)}</td>
+      <td style="min-width:170px"><span class="num">${ativos}</span> ativos de <span class="num">${(a.candidatos || []).length}</span>${barraFunil(a)}</td>
+      <td class="num">${fmtData(a.abertoEm)}</td>
     </tr>`;
   }).join('');
 
   return `
-  <div class="linha" style="margin-bottom:14px">
-    <h1>Assignments</h1>
-    <div class="espaco"></div>
-    <button class="btn" data-acao="novoAssignment">+ Novo assignment</button>
-  </div>
+  ${cabecalho('Buscas', 'Assignments', 'Cada busca com o seu funil, do mapeamento à contratação.',
+    seEdita('<button class="btn" data-acao="novoAssignment">+ Novo assignment</button>'))}
   <div class="cartao">
-    <div class="linha" style="margin-bottom:10px">
+    <div class="linha" style="margin-bottom:14px">
       <input id="busca-assign" placeholder="Buscar por posição, cliente ou cargo" value="${esc(telaAssignments.filtro || '')}" style="max-width:340px" data-acao="filtrarAssignments">
       <select style="max-width:170px" data-acao="situacaoAssignments">
         ${['Aberto', 'Stand-by', 'Concluído', 'Cancelado', 'Todos'].map((s) =>
           `<option ${s === situacao ? 'selected' : ''}>${s}</option>`).join('')}
       </select>
     </div>
-    ${lista.length ? `<table><thead><tr><th>Posição</th><th>Cliente</th><th>Status</th><th>Pipeline</th><th>Aberto em</th></tr></thead><tbody>${linhas}</tbody></table>`
+    ${lista.length ? `<div class="rolagem"><table><thead><tr><th>Posição</th><th>Cliente</th><th>Status</th><th>Pipeline</th><th>Aberto em</th></tr></thead><tbody>${linhas}</tbody></table></div>`
       : '<div class="vazio">Nenhum assignment nesse filtro.</div>'}
   </div>`;
 }
 
 function formAssignment(a) {
+  const novo = !a;
   a = a || {};
-  const clientes = base.clientes.map((c) =>
-    `<option value="${c.id}" ${c.id === a.clienteId ? 'selected' : ''}>${esc(c.nome)}</option>`).join('');
+  const cfg = base.configuracao || configuracaoPadrao();
+  const cliente = acharCliente(a.clienteId);
+  const processoId = a.processoId || cfg.processoPadraoId;
+  const etapas = a.etapas && a.etapas.length
+    ? a.etapas
+    : ((cfg.processos.find((pr) => pr.id === processoId) || cfg.processos[0]).etapas);
+  const consultores = (base.usuarios || []).filter((u) => u.ativo !== false && u.papel !== 'leitura');
+
   return `
-  <div class="grade g2">
-    <div class="campo"><label>Posição / título do assignment *</label>
-      <input id="f-titulo" value="${esc(a.titulo || '')}" placeholder="Ex.: Diretor Comercial LATAM"></div>
-    <div class="campo"><label>Cliente</label>
-      <select id="f-cliente"><option value="">— selecione —</option>${clientes}</select>
-      <div class="subtexto" style="margin-top:4px">Cadastre clientes na aba Clientes.</div></div>
-    <div class="campo"><label>Cargo</label><input id="f-cargo" value="${esc(a.cargo || '')}"></div>
-    <div class="campo"><label>Local</label><input id="f-local" value="${esc(a.localizacao || '')}"></div>
-    <div class="campo"><label>Senioridade</label>
-      <select id="f-senioridade"><option value="">—</option>
-      ${SENIORIDADES.map((s) => `<option ${s === a.senioridade ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="campo"><label>Consultor responsável</label><input id="f-consultor" value="${esc(a.consultor || '')}"></div>
-    <div class="campo"><label>Faixa salarial / pacote</label><input id="f-faixa" value="${esc(a.faixaSalarial || '')}"></div>
-    <div class="campo"><label>Prazo alvo</label><input id="f-prazo" type="date" value="${(a.prazoAlvo || '').slice(0, 10)}"></div>
-    <div class="campo"><label>Status</label>
-      <select id="f-status">${STATUS_ASSIGNMENT.map((s) =>
-        `<option ${s === (a.status || 'Aberto') ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="campo"><label>Aberto em</label>
-      <input id="f-abertura" type="date" value="${(a.abertoEm || hoje()).slice(0, 10)}"></div>
+  <div class="abas" id="abas-assignment">
+    <button class="ativo" data-acao="abaAssignment" data-aba="dados">Dados</button>
+    <button data-acao="abaAssignment" data-aba="pacote">Pacote</button>
+    <button data-acao="abaAssignment" data-aba="jobspec">Job spec</button>
+    <button data-acao="abaAssignment" data-aba="processo">Processo</button>
   </div>
-  <div class="campo"><label>Descritivo da posição (job spec)</label>
-    <textarea id="f-descricao" placeholder="Contexto, desafios, entregas esperadas, perfil ideal">${esc(a.descricao || '')}</textarea></div>
-  <div class="campo"><label>Etapas do processo (uma por linha — dá para adaptar por assignment)</label>
-    <textarea id="f-etapas">${esc((a.etapas && a.etapas.length ? a.etapas : ETAPAS_PADRAO).join('\n'))}</textarea></div>
-  <div class="linha">
+
+  <section data-painel="dados">
+    <div class="grade g2">
+      <div class="campo"><label>Posição / título do assignment *</label>
+        <input id="f-titulo" value="${esc(a.titulo || '')}" placeholder="Ex.: Diretor Comercial LATAM"></div>
+      <div class="campo"><label>Cliente</label>
+        <select id="f-cliente" data-acao="trocouCliente">
+          <option value="">— selecione —</option>
+          ${base.clientes.map((c) => `<option value="${c.id}" ${c.id === a.clienteId ? 'selected' : ''}>${esc(c.nome)}</option>`).join('')}
+        </select></div>
+      <div class="campo"><label>Ponto de contato no cliente</label>
+        <select id="f-contato">${opcoesContato(cliente, a.contatoId)}</select>
+        <div class="dica">Os contatos são cadastrados na ficha do cliente.</div></div>
+      <div class="campo"><label>Consultor responsável</label>
+        <select id="f-consultor">
+          <option value="">— selecione —</option>
+          ${consultores.map((u) => `<option value="${u.id}" ${u.id === (a.consultorId || (eu && novo ? eu.id : '')) ? 'selected' : ''}>${esc(u.nome)}</option>`).join('')}
+        </select>
+        <div class="dica">A lista vem dos usuários do sistema — quem trabalha a busca precisa ter acesso.</div></div>
+      <div class="campo"><label>Cargo</label><input id="f-cargo" value="${esc(a.cargo || '')}"></div>
+      <div class="campo"><label>Local</label><input id="f-local" value="${esc(a.localizacao || '')}"></div>
+      <div class="campo"><label>Senioridade</label>
+        <select id="f-senioridade"><option value="">—</option>
+        ${SENIORIDADES.map((x) => `<option ${x === a.senioridade ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+      <div class="campo"><label>Status</label>
+        <select id="f-status">${STATUS_ASSIGNMENT.map((x) =>
+          `<option ${x === (a.status || 'Aberto') ? 'selected' : ''}>${x}</option>`).join('')}</select></div>
+      <div class="campo"><label>Aberto em</label>
+        <input id="f-abertura" type="date" value="${(a.abertoEm || hoje()).slice(0, 10)}"></div>
+      <div class="campo"><label>Prazo alvo</label>
+        <input id="f-prazo" type="date" value="${(a.prazoAlvo || '').slice(0, 10)}"></div>
+    </div>
+  </section>
+
+  <section data-painel="pacote" class="escondido">
+    ${cliente && pacotePreenchido(cliente.pacotePadrao) ? `<div class="linha" style="margin-bottom:14px">
+      <button class="btn btn-sec btn-mini" data-acao="usarPacoteCliente" data-id="${cliente.id}">Usar o pacote padrão de ${esc(cliente.nome)}</button>
+      <span class="dica">${esc(resumoPacote(cliente.pacotePadrao))}</span></div>` : ''}
+    ${camposPacote(a.pacote, 'pk')}
+    <label class="marcador" style="margin-top:6px"><input type="checkbox" id="f-salvar-pacote">
+      Guardar este pacote como padrão do cliente</label>
+  </section>
+
+  <section data-painel="jobspec" class="escondido">
+    ${camposJobSpec(a.jobSpec)}
+  </section>
+
+  <section data-painel="processo" class="escondido">
+    <div class="campo"><label>Processo de seleção</label>
+      <select id="f-processo" data-acao="trocouProcesso">
+        ${cfg.processos.map((pr) => `<option value="${pr.id}" ${pr.id === processoId ? 'selected' : ''}>${esc(pr.nome)}</option>`).join('')}
+        <option value="livre" ${processoId === 'livre' ? 'selected' : ''}>Etapas só desta busca</option>
+      </select>
+      <div class="dica">Escolher um processo preenche as etapas abaixo; a partir daí você ajusta o que quiser
+        — a mudança vale só para este assignment.</div></div>
+    <div class="campo"><label>Etapas, na ordem (uma por linha)</label>
+      <textarea id="f-etapas" style="min-height:150px">${esc(etapas.join('\n'))}</textarea></div>
+    <label class="marcador"><input type="checkbox" id="f-salvar-processo" data-acao="alternarNomeProcesso">
+      Salvar estas etapas como um novo processo reutilizável</label>
+    <div class="campo escondido" id="f-processo-nome-caixa" style="margin-top:10px">
+      <label>Nome do novo processo</label><input id="f-processo-nome" placeholder="Ex.: Busca para conselho"></div>
+    ${ehAdmin() ? '<div class="dica" style="margin-top:10px">Os processos padrão da consultoria ficam em <strong>Configurações</strong>.</div>' : ''}
+  </section>
+
+  <div class="linha" style="margin-top:18px">
     <button class="btn" data-acao="salvarAssignment" data-id="${a.id || ''}">Salvar</button>
     <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
     ${a.id ? '<button class="btn btn-perigo espaco" data-acao="excluirAssignment" data-id="' + a.id + '">Excluir</button>' : ''}
   </div>`;
 }
+
+function opcoesContato(cliente, contatoId) {
+  const contatos = (cliente && cliente.contatos) || [];
+  if (!contatos.length) return '<option value="">— cliente sem contatos cadastrados —</option>';
+  return '<option value="">— selecione —</option>' + contatos.map((k) =>
+    `<option value="${k.id}" ${k.id === contatoId ? 'selected' : ''}>${esc(k.nome)}${k.cargo ? ' — ' + esc(k.cargo) : ''}</option>`).join('');
+}
+
+acoes.abaAssignment = (el, d) => {
+  $$('#abas-assignment button').forEach((b) => b.classList.toggle('ativo', b === el));
+  $$('#modal-corpo [data-painel]').forEach((p) => p.classList.toggle('escondido', p.dataset.painel !== d.aba));
+};
+
+acoes.trocouCliente = (el) => {
+  const cliente = acharCliente(el.value);
+  $('#f-contato').innerHTML = opcoesContato(cliente, '');
+};
+
+acoes.alternarNomeProcesso = (el) => {
+  $('#f-processo-nome-caixa').classList.toggle('escondido', !el.checked);
+};
+
+acoes.trocouProcesso = (el) => {
+  const cfg = base.configuracao || configuracaoPadrao();
+  const processo = cfg.processos.find((pr) => pr.id === el.value);
+  if (processo) $('#f-etapas').value = processo.etapas.join('\n');
+};
+
+acoes.usarPacoteCliente = (el, d) => {
+  const cliente = acharCliente(d.id);
+  if (!cliente || !cliente.pacotePadrao) return;
+  const p = cliente.pacotePadrao;
+  $('#pk-fixo-mes').value = p.fixoMensal || '';
+  $('#pk-fixo-ano').value = p.fixoAnual || '';
+  $('#pk-bonus-tipo').value = p.bonusTipo || 'percentual';
+  $('#pk-bonus-valor').value = p.bonusValor || '';
+  $('#pk-bonus-desc').value = p.bonusDescricao || '';
+  $('#pk-outros').value = p.outros || '';
+  $('#pk-obs').value = p.observacao || '';
+  const marcados = new Set(p.beneficios || []);
+  $$('#pk-beneficios input').forEach((i) => { i.checked = marcados.has(i.value); });
+  const conhecidos = new Set(((base.configuracao || {}).beneficios) || []);
+  $('#pk-beneficios-extra').value = (p.beneficios || []).filter((b) => !conhecidos.has(b)).join(', ');
+  aviso('Pacote do cliente aplicado — ajuste o que for diferente nesta posição.');
+};
 
 acoes.novoAssignment = () => abrirModal('Novo assignment', formAssignment(null));
 acoes.editarAssignment = (el, d) => abrirModal('Editar assignment', formAssignment(acharAssignment(d.id)));
@@ -755,18 +1466,35 @@ acoes.salvarAssignment = (el, d) => {
   let a = d.id ? acharAssignment(d.id) : null;
   const novo = !a;
   if (novo) { a = { id: uid(), candidatos: [], criadoEm: hoje() }; base.assignments.push(a); }
+
   a.titulo = titulo;
   a.clienteId = $('#f-cliente').value;
+  a.contatoId = $('#f-contato').value;
+  a.consultorId = $('#f-consultor').value;
+  const consultor = (base.usuarios || []).find((u) => u.id === a.consultorId);
+  a.consultor = consultor ? consultor.nome : '';
   a.cargo = $('#f-cargo').value.trim();
   a.localizacao = $('#f-local').value.trim();
   a.senioridade = $('#f-senioridade').value;
-  a.consultor = $('#f-consultor').value.trim();
-  a.faixaSalarial = $('#f-faixa').value.trim();
-  a.prazoAlvo = $('#f-prazo').value;
   a.status = $('#f-status').value;
   a.abertoEm = $('#f-abertura').value || hoje();
-  a.descricao = $('#f-descricao').value;
-  a.etapas = $('#f-etapas').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  a.prazoAlvo = $('#f-prazo').value;
+  a.pacote = lerPacote('pk');
+  a.jobSpec = lerJobSpec();
+  a.descricao = a.jobSpec.missao;          // compatível com o formato antigo
+  a.etapas = porLinha($('#f-etapas').value);
+  a.processoId = $('#f-processo').value;
+
+  if ($('#f-salvar-pacote').checked && a.clienteId) {
+    const cliente = acharCliente(a.clienteId);
+    if (cliente) cliente.pacotePadrao = JSON.parse(JSON.stringify(a.pacote));
+  }
+  if ($('#f-salvar-processo').checked) {
+    const nome = ($('#f-processo-nome').value || '').trim() || `Processo de ${titulo}`;
+    base.configuracao.processos.push({ id: uid(), nome, etapas: a.etapas.slice() });
+    aviso(`Processo "${nome}" guardado para reutilizar.`);
+  }
+
   registrarAtividade('assignment', `${novo ? 'Assignment criado' : 'Assignment atualizado'}: ${a.titulo}`, { assignmentId: a.id });
   salvar(); fecharModal();
   if (novo) ir('#/assignment/' + a.id); else render();
@@ -783,21 +1511,33 @@ acoes.situacaoAssignments = (el) => { telaAssignments.situacao = el.value; rende
 
 /* ---------------------------- assignment: pipeline ---------------------------- */
 
+function pontosFit(fit) {
+  const n = Number(fit) || 0;
+  if (!n) return '';
+  return `<span class="fit" title="Aderência ${n} de 5">` +
+    [1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('') + '</span>';
+}
+
 function fichaCandidato(a, v) {
   const c = acharCandidato(v.candidatoId) || { nome: '(removido)' };
   const d = diasDesde(v.etapaDesde || v.entrouEm);
   const parado = (v.situacao || 'Ativo') === 'Ativo' && d != null && d >= DIAS_PARADO;
-  return `<div class="ficha ${parado ? 'parado' : ''}" draggable="true"
+  return `<article class="ficha ${parado ? 'parado' : ''}" draggable="true"
       data-candidato="${v.candidatoId}" data-assignment="${a.id}"
       data-acao="abrirVinculo" data-id="${a.id}" data-cid="${v.candidatoId}">
-    <strong>${esc(c.nome)}</strong>
-    <div class="sub">${esc(c.cargoAtual || c.headline || '')}${c.empresaAtual ? ' · ' + esc(c.empresaAtual) : ''}</div>
-    <div class="linha" style="margin-top:6px;gap:4px">
-      ${v.fit ? `<span class="tag tag-azul">fit ${esc(v.fit)}/5</span>` : ''}
-      ${d != null ? `<span class="tag ${parado ? 'tag-amarela' : ''}">${d} d</span>` : ''}
-      ${v.situacao && v.situacao !== 'Ativo' ? `<span class="tag ${v.situacao === 'Contratado' ? 'tag-verde' : 'tag-vermelha'}">${esc(v.situacao)}</span>` : ''}
+    <div class="quem">
+      <div class="avatar avatar-p">${esc(iniciais(c.nome))}</div>
+      <div style="min-width:0">
+        <strong>${esc(c.nome)}</strong>
+        <div class="cargo">${esc(c.cargoAtual || c.headline || '')}${c.empresaAtual ? ' · ' + esc(c.empresaAtual) : ''}</div>
+      </div>
     </div>
-  </div>`;
+    <div class="rodape">
+      ${pontosFit(v.fit)}
+      ${v.situacao && v.situacao !== 'Ativo' ? `<span class="tag ${v.situacao === 'Contratado' ? 'tag-verde' : 'tag-vermelha'}">${esc(v.situacao)}</span>` : ''}
+      ${d != null ? `<span class="dias" title="há ${d} dias nesta etapa">${d}d</span>` : ''}
+    </div>
+  </article>`;
 }
 
 function telaAssignment(id) {
@@ -807,49 +1547,138 @@ function telaAssignment(id) {
   const ativos = (a.candidatos || []).filter((v) => ['Ativo', 'Contratado'].includes(v.situacao || 'Ativo'));
   const fora = (a.candidatos || []).filter((v) => !['Ativo', 'Contratado'].includes(v.situacao || 'Ativo'));
 
-  const colunas = etapas.map((e) => {
+  // A cor da coluna caminha do azul frio ao verde: a matiz codifica o avanço.
+  const colunas = etapas.map((e, i) => {
     const naEtapa = ativos.filter((v) => v.etapa === e);
-    return `<div class="coluna" data-etapa="${esc(e)}" data-assignment="${a.id}">
-      <h4><span>${esc(e)}</span><span>${naEtapa.length}</span></h4>
-      ${naEtapa.map((v) => fichaCandidato(a, v)).join('') || '<div class="subtexto" style="font-size:12px">—</div>'}
+    const matiz = Math.round(214 - (i / Math.max(1, etapas.length - 1)) * 66);
+    return `<div class="coluna" data-etapa="${esc(e)}" data-assignment="${a.id}" style="--etapa-h:${matiz}">
+      <h4><span>${esc(e)}</span><span class="qtd">${naEtapa.length}</span></h4>
+      ${naEtapa.map((v) => fichaCandidato(a, v)).join('') || '<div class="nada">—</div>'}
     </div>`;
   }).join('');
 
   return `
-  <div class="linha" style="margin-bottom:6px">
-    <div>
-      <h1 style="margin-bottom:2px">${esc(a.titulo)}</h1>
-      <div class="subtexto">${esc(nomeCliente(a.clienteId))}${a.localizacao ? ' · ' + esc(a.localizacao) : ''}${a.consultor ? ' · ' + esc(a.consultor) : ''}</div>
-    </div>
-    <div class="espaco"></div>
-    <span class="tag ${a.status === 'Aberto' ? 'tag-azul' : 'tag-cinza'}">${esc(a.status)}</span>
-    <button class="btn" data-acao="adicionarAoAssignment" data-id="${a.id}">+ Candidato</button>
-    <button class="btn btn-sec" data-acao="verRelatorioAssignment" data-id="${a.id}">Relatório</button>
-    <button class="btn btn-fantasma" data-acao="editarAssignment" data-id="${a.id}">Editar</button>
-  </div>
+  ${cabecalho(nomeCliente(a.clienteId), a.titulo,
+    `<span class="tag ${a.status === 'Aberto' ? 'tag-azul' : 'tag-cinza'}">${esc(a.status)}</span>
+     ${a.localizacao ? '<span class="tag">' + esc(a.localizacao) + '</span>' : ''}
+     ${a.consultor ? '<span class="tag">' + esc(a.consultor) + '</span>' : ''}`,
+    `${seEdita(`<button class="btn" data-acao="adicionarAoAssignment" data-id="${a.id}">+ Profissional</button>`)}
+     <button class="btn btn-sec" data-acao="verRelatorioAssignment" data-id="${a.id}">Relatório</button>
+     ${seEdita(`<button class="btn btn-fantasma" data-acao="editarAssignment" data-id="${a.id}">Editar</button>`)}`)}
 
-  <div class="grade g4" style="margin:12px 0">
+  <div class="grade g4" style="margin-bottom:18px">
     <div class="kpi"><div class="n">${(a.candidatos || []).length}</div><div class="r">mapeados no total</div></div>
     <div class="kpi"><div class="n">${ativos.filter((v) => (v.situacao || 'Ativo') === 'Ativo').length}</div><div class="r">ativos no funil</div></div>
-    <div class="kpi"><div class="n">${(a.candidatos || []).filter((v) => v.etapa === 'Short list').length}</div><div class="r">na short list</div></div>
+    <div class="kpi destaque"><div class="n">${(a.candidatos || []).filter((v) => v.etapa === 'Short list').length}</div><div class="r">na short list</div></div>
     <div class="kpi"><div class="n">${diasDesde(a.abertoEm) == null ? '—' : diasDesde(a.abertoEm)}</div><div class="r">dias em aberto</div></div>
   </div>
 
-  ${a.descricao ? `<div class="cartao"><h3>Descritivo da posição</h3><div class="subtexto">${nl2br(a.descricao)}</div>
-    ${a.faixaSalarial ? `<div style="margin-top:8px"><span class="tag">Pacote: ${esc(a.faixaSalarial)}</span> ${a.prazoAlvo ? `<span class="tag">Prazo: ${fmtData(a.prazoAlvo)}</span>` : ''}</div>` : ''}</div>` : ''}
+  ${blocoJobSpec(a)}
 
-  <h2>Pipeline <span class="subtexto" style="font-weight:400">— arraste as fichas entre as etapas</span></h2>
+  <div class="linha" style="margin-bottom:10px">
+    <h2>Pipeline</h2>
+    <span class="subtexto">arraste as fichas entre as etapas</span>
+  </div>
   <div class="kanban">${colunas}</div>
 
   ${fora.length ? `<div class="cartao"><h3>Fora do processo (${fora.length})</h3>
-    <table><tbody>${fora.map((v) => {
+    <div class="rolagem"><table><tbody>${fora.map((v) => {
       const c = acharCandidato(v.candidatoId) || {};
       return `<tr class="clicavel" data-acao="abrirVinculo" data-id="${a.id}" data-cid="${v.candidatoId}">
         <td><strong>${esc(c.nome || '—')}</strong><div class="subtexto">${esc(c.cargoAtual || '')}</div></td>
         <td><span class="tag tag-vermelha">${esc(v.situacao)}</span></td>
         <td class="subtexto">${esc(v.motivo || '')}</td></tr>`;
-    }).join('')}</tbody></table></div>` : ''}`;
+    }).join('')}</tbody></table></div></div>` : ''}`;
 }
+
+/** Job spec, pacote e busca no LinkedIn, na tela do assignment. */
+function blocoJobSpec(a) {
+  const js = a.jobSpec || {};
+  const cliente = acharCliente(a.clienteId);
+  const contato = ((cliente || {}).contatos || []).find((k) => k.id === a.contatoId);
+  const busca = buscaBooleana(a);
+  const obrig = (js.competencias || []).filter((c) => c.tipo !== 'Desejável');
+  const desej = (js.competencias || []).filter((c) => c.tipo === 'Desejável');
+  const listaComp = (lista) => lista.map((c) =>
+    `<span class="tag">${esc(c.nome)}${c.anos ? ' · ' + esc(c.anos) + ' anos' : ''}</span>`).join(' ');
+
+  const temSpec = js.missao || (js.entregas || []).length || (js.competencias || []).length ||
+    (js.formacao || []).length || (js.idiomas || []).length;
+
+  return `
+  <div class="grade g2" style="margin-bottom:16px">
+    <div class="cartao">
+      <h3>Job spec</h3>
+      ${js.missao ? `<p class="subtexto">${nl2br(js.missao)}</p>` : ''}
+      ${(js.entregas || []).length ? `<h4 style="margin-top:14px">Entregas esperadas</h4>
+        <ul class="lista-simples">${js.entregas.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}
+      ${obrig.length ? `<h4 style="margin-top:14px">Obrigatórias</h4><div class="tags">${listaComp(obrig)}</div>` : ''}
+      ${desej.length ? `<h4 style="margin-top:12px">Desejáveis</h4><div class="tags">${listaComp(desej)}</div>` : ''}
+      ${(js.formacao || []).length ? `<h4 style="margin-top:14px">Formação</h4>
+        <div class="tags">${js.formacao.map((f) => `<span class="tag">${esc([f.nivel, f.curso].filter(Boolean).join(' em '))}${f.instituicao ? ' · ' + esc(f.instituicao) : ''}</span>`).join(' ')}</div>` : ''}
+      ${(js.idiomas || []).length ? `<h4 style="margin-top:12px">Idiomas</h4>
+        <div class="tags">${js.idiomas.map((i) => `<span class="tag">${esc(i.idioma)} · ${esc(i.nivel || '')}</span>`).join(' ')}</div>` : ''}
+      ${!temSpec ? `<div class="subtexto">Job spec ainda não detalhado.
+        ${seEdita(`<a href="#" data-acao="editarAssignment" data-id="${a.id}">Preencher agora</a>`)}</div>` : ''}
+    </div>
+
+    <div class="pilha">
+      <div class="cartao">
+        <h3>Pacote</h3>
+        ${pacotePreenchido(a.pacote) ? tabelaPacote(a.pacote) : '<div class="subtexto">Pacote não definido.</div>'}
+      </div>
+      <div class="cartao">
+        <h3>Cliente e time</h3>
+        <table><tbody>
+          <tr><th>Cliente</th><td>${esc((cliente || {}).nome || '—')}</td></tr>
+          <tr><th>Contato</th><td>${contato
+            ? `<strong>${esc(contato.nome)}</strong>${contato.cargo ? ' — ' + esc(contato.cargo) : ''}
+               <div class="subtexto">${esc(contato.email || '')}${contato.telefone ? ' · ' + esc(contato.telefone) : ''}</div>`
+            : '<span class="subtexto">nenhum contato definido</span>'}</td></tr>
+          <tr><th>Consultor</th><td>${esc(a.consultor || '—')}</td></tr>
+          <tr><th>Processo</th><td>${esc(nomeProcesso(a))} · ${etapasDe(a).length} etapas</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+  </div>
+
+  ${busca ? `<div class="cartao" style="margin-bottom:16px">
+    <div class="linha" style="margin-bottom:10px">
+      <h3 style="margin:0">Busca no LinkedIn</h3>
+      <span class="subtexto">gerada a partir do job spec</span>
+      <div class="espaco"></div>
+      <button class="btn btn-sec btn-mini" data-acao="copiarBusca" data-id="${a.id}">Copiar</button>
+      <a class="btn btn-mini" href="${esc(linkBuscaLinkedIn(a))}" target="_blank" rel="noopener">Abrir no LinkedIn</a>
+    </div>
+    <code class="busca" id="busca-${a.id}">${esc(busca)}</code>
+    <div class="dica">Cole na busca de pessoas do LinkedIn (ou clique em abrir). Depois de achar o perfil,
+      use <strong>+ Profissional</strong> para trazer os dados para cá.</div>
+  </div>` : ''}`;
+}
+
+function tabelaPacote(p) {
+  const moeda = (base.configuracao || {}).moeda || 'R$';
+  const linhas = [];
+  if (p.fixoMensal) linhas.push(['Fixo mensal', `${moeda} ${p.fixoMensal}`]);
+  if (p.fixoAnual) linhas.push(['Fixo anual', `${moeda} ${p.fixoAnual}`]);
+  if (p.bonusValor && p.bonusTipo !== 'nenhum') {
+    const valor = p.bonusTipo === 'percentual' ? p.bonusValor + '%'
+      : p.bonusTipo === 'meses' ? p.bonusValor + ' salários' : moeda + ' ' + p.bonusValor;
+    linhas.push(['Bônus', valor + (p.bonusDescricao ? ` <span class="subtexto">— ${esc(p.bonusDescricao)}</span>` : '')]);
+  }
+  if (p.outros) linhas.push(['Longo prazo', esc(p.outros)]);
+  if (p.observacao) linhas.push(['Observação', esc(p.observacao)]);
+  return `<table><tbody>${linhas.map(([k, v]) => `<tr><th>${esc(k)}</th><td>${v}</td></tr>`).join('')}</tbody></table>
+    ${(p.beneficios || []).length ? `<div class="tags" style="margin-top:12px">${p.beneficios.map((b) => `<span class="tag">${esc(b)}</span>`).join(' ')}</div>` : ''}`;
+}
+
+function nomeProcesso(a) {
+  const cfg = base.configuracao || configuracaoPadrao();
+  const pr = cfg.processos.find((x) => x.id === a.processoId);
+  return pr ? pr.nome : 'Etapas próprias desta busca';
+}
+
+acoes.copiarBusca = (el, d) => copiar($('#busca-' + d.id).textContent);
 
 function ligarKanban() {
   let arrastando = null;
@@ -1048,26 +1877,27 @@ function telaCandidatos() {
     const procs = processosDoCandidato(c.id);
     const cons = (c.consentimento || {}).status;
     return `<tr class="clicavel" data-acao="abrirCandidato" data-cid="${c.id}">
-      <td><strong>${esc(c.nome)}</strong><div class="subtexto">${esc(c.headline || '')}</div></td>
+      <td><div class="linha" style="gap:10px;flex-wrap:nowrap">
+        <div class="avatar avatar-p">${esc(iniciais(c.nome))}</div>
+        <div style="min-width:0"><strong>${esc(c.nome)}</strong>
+          <div class="subtexto">${esc(c.headline || '')}</div></div>
+      </div></td>
       <td>${esc(c.cargoAtual || '')}<div class="subtexto">${esc(c.empresaAtual || '')}</div></td>
       <td>${esc(c.localizacao || '—')}</td>
       <td>${procs.length ? procs.map((p) => `<span class="tag tag-azul">${esc(p.assignment.titulo)}</span>`).join(' ') : '<span class="subtexto">—</span>'}</td>
       <td>${cons === 'concedido' ? '<span class="tag tag-verde">consentimento ok</span>' :
         cons === 'negado' ? '<span class="tag tag-vermelha">recusou</span>' : '<span class="tag tag-amarela">pendente</span>'}</td>
-      <td class="subtexto">${fmtData(c.atualizadoEm || c.criadoEm)}</td>
+      <td class="num subtexto">${fmtData(c.atualizadoEm || c.criadoEm)}</td>
     </tr>`;
   }).join('');
 
   return `
-  <div class="linha" style="margin-bottom:14px">
-    <h1>Banco de profissionais</h1>
-    <div class="espaco"></div>
-    <button class="btn" data-acao="novoCandidatoLinkedIn">+ Importar do LinkedIn</button>
-    <button class="btn btn-sec" data-acao="novoCandidatoManual">+ Manual</button>
-    <button class="btn btn-fantasma" data-acao="exportarCandidatosCSV">CSV</button>
-  </div>
+  ${cabecalho('Acervo', 'Profissionais', 'O banco que se reaproveita de uma busca para a outra.',
+    `${seEdita('<button class="btn" data-acao="novoCandidatoLinkedIn">+ Importar do LinkedIn</button>')}
+     ${seEdita('<button class="btn btn-sec" data-acao="novoCandidatoManual">+ Manual</button>')}
+     <button class="btn btn-fantasma" data-acao="exportarCandidatosCSV">CSV</button>`)}
   <div class="cartao">
-    <div class="linha" style="margin-bottom:10px">
+    <div class="linha" style="margin-bottom:14px">
       <input id="busca-cand" placeholder="Buscar por nome, empresa, cargo, competência…" value="${esc(telaCandidatos.filtro || '')}" style="max-width:380px" data-acao="filtrarCandidatos">
       <select style="max-width:180px" data-acao="filtrarSenioridade">
         <option value="">Toda senioridade</option>
@@ -1075,7 +1905,7 @@ function telaCandidatos() {
       </select>
       <span class="subtexto espaco">${lista.length} profissiona${lista.length === 1 ? 'l' : 'is'}</span>
     </div>
-    ${lista.length ? `<table><thead><tr><th>Nome</th><th>Posição atual</th><th>Local</th><th>Processos</th><th>LGPD</th><th>Atualizado</th></tr></thead><tbody>${linhas}</tbody></table>`
+    ${lista.length ? `<div class="rolagem"><table><thead><tr><th>Nome</th><th>Posição atual</th><th>Local</th><th>Processos</th><th>LGPD</th><th>Atualizado</th></tr></thead><tbody>${linhas}</tbody></table></div>`
       : '<div class="vazio">Banco vazio. Importe um perfil do LinkedIn para começar.</div>'}
   </div>`;
 }
@@ -1104,17 +1934,11 @@ function telaCandidato(id) {
     `<li><div>${nl2br(n.texto)}</div><div class="q">${fmtData(n.data)}</div></li>`).join('');
 
   return `
-  <div class="linha" style="margin-bottom:10px">
-    <div>
-      <h1 style="margin-bottom:2px">${esc(c.nome)}</h1>
-      <div class="subtexto">${esc(c.headline || '')}</div>
-    </div>
-    <div class="espaco"></div>
-    <button class="btn" data-acao="editarCandidato" data-cid="${c.id}">Editar</button>
-    <button class="btn btn-sec" data-acao="atualizarPeloLinkedIn" data-cid="${c.id}">Atualizar pelo LinkedIn</button>
-    <button class="btn btn-sec" data-acao="linkAtualizacao" data-cid="${c.id}">Link de atualização</button>
-    <button class="btn btn-fantasma" data-acao="verRelatorioCandidato" data-cid="${c.id}">Relatório</button>
-  </div>
+  ${cabecalho(c.empresaAtual || 'Profissional', c.nome, esc(c.headline || c.cargoAtual || ''),
+    `${seEdita(`<button class="btn" data-acao="editarCandidato" data-cid="${c.id}">Editar</button>`)}
+     ${seEdita(`<button class="btn btn-sec" data-acao="atualizarPeloLinkedIn" data-cid="${c.id}">Atualizar pelo LinkedIn</button>`)}
+     ${seEdita(`<button class="btn btn-sec" data-acao="linkAtualizacao" data-cid="${c.id}">Link de atualização</button>`)}
+     <button class="btn btn-fantasma" data-acao="verRelatorioCandidato" data-cid="${c.id}">Relatório</button>`)}
 
   <div class="grade g2">
     <div class="cartao">
@@ -1148,9 +1972,9 @@ function telaCandidato(id) {
         ${cons.base ? `Base legal: ${esc(cons.base)}.<br>` : ''}
         ${cons.origem ? `Origem: ${esc(cons.origem)}.` : ''}
       </div>
-      <div class="linha" style="margin-top:10px">
-        <button class="btn btn-sec btn-mini" data-acao="registrarConsentimento" data-cid="${c.id}">Registrar consentimento</button>
-        <button class="btn btn-perigo btn-mini" data-acao="excluirCandidato" data-cid="${c.id}">Excluir dados</button>
+      <div class="linha" style="margin-top:14px">
+        ${seEdita(`<button class="btn btn-sec btn-mini" data-acao="registrarConsentimento" data-cid="${c.id}">Registrar consentimento</button>`)}
+        ${seEdita(`<button class="btn btn-perigo btn-mini" data-acao="excluirCandidato" data-cid="${c.id}">Excluir dados</button>`)}
       </div>
       <h3 style="margin-top:16px">Processos (${procs.length})</h3>
       ${procs.length ? `<table><tbody>${procs.map((p) =>
@@ -1169,8 +1993,8 @@ function telaCandidato(id) {
 
   <div class="cartao">
     <h3>Anotações do consultor</h3>
-    <div class="campo"><textarea id="c-nota" placeholder="Registro de conversa, referências, motivações…"></textarea>
-      <button class="btn btn-sec btn-mini" style="margin-top:6px" data-acao="addNotaCandidato" data-cid="${c.id}">Adicionar</button></div>
+    ${seEdita(`<div class="campo"><textarea id="c-nota" placeholder="Registro de conversa, referências, motivações…"></textarea>
+      <button class="btn btn-sec btn-mini" style="margin-top:8px" data-acao="addNotaCandidato" data-cid="${c.id}">Adicionar</button></div>`)}
     ${notas ? `<ul class="timeline">${notas}</ul>` : '<div class="subtexto">Sem anotações.</div>'}
   </div>`;
 }
@@ -1326,22 +2150,96 @@ acoes.salvarConsentimento = (el, d) => {
 function telaImportacao(assignmentId, candidatoId) {
   const c = candidatoId ? acharCandidato(candidatoId) : null;
   return `
-  <p class="subtexto">Abra o perfil no LinkedIn, selecione a página inteira (<strong>Ctrl/Cmd + A</strong>),
-  copie (<strong>Ctrl/Cmd + C</strong>) e cole abaixo. Também funciona com o texto do PDF que o LinkedIn
-  gera em <em>Mais → Salvar em PDF</em>, ou com um currículo colado.</p>
   ${c ? `<p class="subtexto">Atualizando o perfil de <strong>${esc(c.nome)}</strong> — você revisa antes de gravar.</p>` : ''}
-  <div class="campo"><textarea id="li-texto" style="min-height:220px" placeholder="Cole aqui o perfil copiado…"></textarea></div>
-  <div class="linha">
-    <button class="btn" data-acao="processarLinkedIn" data-assign="${assignmentId || ''}" data-cid="${candidatoId || ''}">Ler perfil</button>
-    <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
+
+  <div class="campo">
+    <label>1. Link do perfil no LinkedIn</label>
+    <div class="linha" style="flex-wrap:nowrap">
+      <input id="li-url" placeholder="https://www.linkedin.com/in/..." value="${esc((c && c.linkedinUrl) || '')}">
+      <button class="btn" data-acao="carregarPorUrl" data-assign="${assignmentId || ''}" data-cid="${candidatoId || ''}">Carregar</button>
+    </div>
+    <div class="dica" id="li-url-msg">O sistema tenta ler a página pública do perfil. O LinkedIn recusa a maior
+      parte dessas leituras — quando recusar, use um dos dois caminhos abaixo, que sempre funcionam.</div>
   </div>
-  <p class="subtexto" style="margin-top:14px">
-    <strong>Sobre o LGPD e a sincronização automática:</strong> o LinkedIn não permite raspagem
-    automática de perfis e não oferece API pública para isso — sincronizar sozinho, sem o profissional
-    saber, além de violar os termos da plataforma, é difícil de sustentar como tratamento legítimo de
-    dados. O caminho seguro é este: importação assistida pelo consultor + <em>link de atualização</em>
-    enviado ao profissional, no qual ele confirma os dados e o consentimento.</p>`;
+
+  <details class="bloco-dobra" open>
+    <summary>2. Colar o perfil (o caminho que sempre funciona)</summary>
+    <p class="subtexto" style="margin-top:10px">Abra o perfil no LinkedIn, selecione a página inteira
+      (<strong>Ctrl/Cmd + A</strong>), copie (<strong>Ctrl/Cmd + C</strong>) e cole aqui. Vale também o texto
+      do PDF que o LinkedIn gera em <em>Mais → Salvar em PDF</em>, ou um currículo.</p>
+    <div class="campo"><textarea id="li-texto" style="min-height:190px" placeholder="Cole aqui o perfil copiado…"></textarea></div>
+    <div class="linha">
+      <button class="btn" data-acao="processarLinkedIn" data-assign="${assignmentId || ''}" data-cid="${candidatoId || ''}">Ler perfil</button>
+      <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
+    </div>
+  </details>
+
+  <details class="bloco-dobra">
+    <summary>3. Capturar com um clique (bookmarklet)</summary>
+    <p class="subtexto" style="margin-top:10px">Arraste o botão abaixo para a barra de favoritos do navegador.
+      Depois, estando no perfil do LinkedIn, clique nele: ele copia o perfil já limpo, e você volta aqui e cola.
+      É o mesmo princípio da extensão que os sistemas grandes usam — só que sem instalar nada.</p>
+    <p><a class="btn btn-sec" href="${esc(bookmarkletCaptura())}"
+      onclick="return false" draggable="true">📋 Capturar perfil</a></p>
+    <div class="dica">Se o navegador não deixar arrastar, crie um favorito qualquer, edite e cole o endereço deste botão.</div>
+  </details>
+
+  <p class="subtexto" style="margin-top:16px">
+    <strong>Por que não sincroniza sozinho:</strong> o LinkedIn não abre API pública de perfis e proíbe leitura
+    automática — sincronizar sem o profissional saber, além de violar os termos, é frágil de sustentar diante da
+    LGPD. Para manter o cadastro vivo, use o <em>link de atualização</em> na ficha do profissional: ele mesmo
+    confirma os dados e o consentimento.</p>`;
 }
+
+/** Bookmarklet: extrai o texto do perfil aberto e copia para a área de transferência. */
+function bookmarkletCaptura() {
+  const codigo = `(function(){
+    if(!/linkedin\\.com/.test(location.host)){alert('Abra um perfil do LinkedIn e clique de novo.');return;}
+    var alvo=document.querySelector('main')||document.body;
+    var t=alvo.innerText.split('\\n').map(function(l){return l.trim();})
+      .filter(function(l,i,a){return l&&l!==a[i-1];}).join('\\n');
+    t=location.href.split('?')[0]+'\\n'+t;
+    navigator.clipboard.writeText(t).then(function(){
+      alert('Perfil copiado! Volte ao Sistema de Recrutamento e cole no campo de importação.');
+    },function(){
+      var c=document.createElement('textarea');c.value=t;document.body.appendChild(c);c.select();
+      document.execCommand('copy');c.remove();alert('Perfil copiado!');
+    });
+  })()`;
+  return 'javascript:' + encodeURIComponent(codigo.replace(/\s*\n\s*/g, ''));
+}
+
+acoes.carregarPorUrl = async (el, d) => {
+  const url = $('#li-url').value.trim();
+  const msg = $('#li-url-msg');
+  if (!url) { aviso('Cole o link do perfil.'); return; }
+  if (modoLocal) {
+    msg.innerHTML = '<strong>Sem servidor não dá para buscar o link.</strong> Use o passo 2 (colar) ou o 3 (bookmarklet). ' +
+      'Na versão com servidor, o sistema tenta ler a página pública.';
+    return;
+  }
+  el.disabled = true;
+  msg.textContent = 'Consultando o LinkedIn…';
+  try {
+    const r = await fetch('api/linkedin', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url })
+    });
+    const resp = await r.json().catch(() => ({}));
+    if (!r.ok || !resp.texto) {
+      msg.innerHTML = `<strong>${esc(resp.erro || 'O LinkedIn não devolveu o perfil.')}</strong>
+        É o comportamento normal dele com quem não está logado — siga pelo passo 2 ou 3 abaixo, que trazem o
+        mesmo resultado.`;
+      el.disabled = false;
+      return;
+    }
+    $('#li-texto').value = resp.texto;
+    msg.textContent = 'Perfil lido. Confira o resultado na próxima tela.';
+    acoes.processarLinkedIn(el, { assign: d.assign, cid: d.cid, url });
+  } catch (e) {
+    msg.textContent = 'Não consegui falar com o servidor.';
+  }
+  el.disabled = false;
+};
 
 acoes.novoCandidatoLinkedIn = (el, d) => abrirModal('Importar perfil do LinkedIn', telaImportacao((d && d.id) || '', ''));
 acoes.atualizarPeloLinkedIn = (el, d) => abrirModal('Atualizar pelo LinkedIn', telaImportacao('', d.cid));
@@ -1357,7 +2255,7 @@ acoes.processarLinkedIn = (el, d) => {
     cargoAtual: p.cargoAtual || (antigo && antigo.cargoAtual) || '',
     empresaAtual: p.empresaAtual || (antigo && antigo.empresaAtual) || '',
     localizacao: p.localizacao || (antigo && antigo.localizacao) || '',
-    linkedinUrl: p.linkedinUrl || (antigo && antigo.linkedinUrl) || '',
+    linkedinUrl: p.linkedinUrl || (d.url || '') || (antigo && antigo.linkedinUrl) || '',
     email: p.email || (antigo && antigo.email) || '',
     telefone: p.telefone || (antigo && antigo.telefone) || '',
     resumo: p.resumo || (antigo && antigo.resumo) || '',
@@ -1424,38 +2322,89 @@ function telaClientes() {
   const linhas = base.clientes.map((c) => {
     const abertos = base.assignments.filter((a) => a.clienteId === c.id && a.status === 'Aberto').length;
     const todos = base.assignments.filter((a) => a.clienteId === c.id).length;
+    const contatos = c.contatos || [];
     return `<tr class="clicavel" data-acao="editarCliente" data-id="${c.id}">
       <td><strong>${esc(c.nome)}</strong><div class="subtexto">${esc(c.setor || '')}</div></td>
-      <td>${esc(c.contatoNome || '—')}<div class="subtexto">${esc(c.contatoEmail || '')}</div></td>
-      <td>${abertos} aberto(s) / ${todos} no total</td>
+      <td>${contatos.length
+        ? contatos.slice(0, 3).map((k) => `<div>${esc(k.nome)}${k.cargo ? ' <span class="subtexto">· ' + esc(k.cargo) + '</span>' : ''}</div>`).join('') +
+          (contatos.length > 3 ? `<div class="subtexto">+${contatos.length - 3}</div>` : '')
+        : '<span class="subtexto">sem contatos</span>'}</td>
+      <td class="num">${abertos} de ${todos}</td>
     </tr>`;
   }).join('');
   return `
-  <div class="linha" style="margin-bottom:14px">
-    <h1>Clientes</h1><div class="espaco"></div>
-    <button class="btn" data-acao="novoCliente">+ Novo cliente</button>
-  </div>
+  ${cabecalho('Carteira', 'Clientes', 'As empresas contratantes e quem responde por cada busca.',
+    seEdita('<button class="btn" data-acao="novoCliente">+ Novo cliente</button>'))}
   <div class="cartao">
-    ${base.clientes.length ? `<table><thead><tr><th>Empresa</th><th>Contato</th><th>Assignments</th></tr></thead><tbody>${linhas}</tbody></table>`
+    ${base.clientes.length ? `<div class="rolagem"><table><thead><tr><th>Empresa</th><th>Contatos</th><th>Abertos / total</th></tr></thead><tbody>${linhas}</tbody></table></div>`
       : '<div class="vazio">Nenhum cliente cadastrado.</div>'}
+  </div>`;
+}
+
+function linhaContato(k) {
+  k = k || {};
+  return `<div class="contato-linha" data-id="${k.id || uid()}">
+    <input placeholder="Nome" data-campo="nome" value="${esc(k.nome || '')}">
+    <input placeholder="Cargo" data-campo="cargo" value="${esc(k.cargo || '')}">
+    <input placeholder="E-mail" data-campo="email" value="${esc(k.email || '')}">
+    <input placeholder="Telefone" data-campo="telefone" value="${esc(k.telefone || '')}">
+    <button class="btn btn-fantasma btn-mini" data-acao="removerLinha" title="Remover contato">✕</button>
   </div>`;
 }
 
 function formCliente(c) {
   c = c || {};
+  const pacote = c.pacotePadrao || pacoteVazio();
+  const contatos = (c.contatos || []).length ? c.contatos : [{ id: uid() }];
   return `
   <div class="grade g2">
     <div class="campo"><label>Empresa *</label><input id="cl-nome" value="${esc(c.nome || '')}"></div>
     <div class="campo"><label>Setor</label><input id="cl-setor" value="${esc(c.setor || '')}"></div>
-    <div class="campo"><label>Contato</label><input id="cl-contato" value="${esc(c.contatoNome || '')}"></div>
-    <div class="campo"><label>E-mail do contato</label><input id="cl-email" value="${esc(c.contatoEmail || '')}"></div>
   </div>
-  <div class="campo"><label>Observações</label><textarea id="cl-obs">${esc(c.obs || '')}</textarea></div>
+
+  <div class="campo">
+    <label>Contatos na empresa</label>
+    <div id="cl-contatos" class="repetidor">${contatos.map(linhaContato).join('')}</div>
+    <button class="btn btn-sec btn-mini" style="margin-top:8px" data-acao="addContato">+ Adicionar contato</button>
+    <div class="dica">Em cada assignment você escolhe qual desses contatos é o ponto focal da busca.</div>
+  </div>
+
+  <details class="bloco-dobra">
+    <summary>Pacote típico desta empresa (opcional)</summary>
+    <div class="dica" style="margin:10px 0 12px">Serve de ponto de partida quando você abrir um assignment
+      para este cliente — dá para ajustar posição a posição.</div>
+    ${camposPacote(pacote, 'clp')}
+  </details>
+
+  <div class="campo" style="margin-top:14px"><label>Observações</label><textarea id="cl-obs">${esc(c.obs || '')}</textarea></div>
   <div class="linha">
     <button class="btn" data-acao="salvarCliente" data-id="${c.id || ''}">Salvar</button>
     <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
     ${c.id ? `<button class="btn btn-perigo espaco" data-acao="excluirCliente" data-id="${c.id}">Excluir</button>` : ''}
   </div>`;
+}
+
+acoes.addContato = () => {
+  const caixa = $('#cl-contatos');
+  caixa.insertAdjacentHTML('beforeend', linhaContato({ id: uid() }));
+  ligarAcoes(caixa);
+  const ultima = caixa.lastElementChild.querySelector('input');
+  if (ultima) ultima.focus();
+};
+
+acoes.removerLinha = (el) => {
+  const linha = el.closest('.contato-linha, .repetidor-linha');
+  if (linha) linha.remove();
+};
+
+function lerContatos() {
+  return $$('#cl-contatos .contato-linha').map((linha) => {
+    const pega = (campo) => (linha.querySelector(`[data-campo="${campo}"]`) || {}).value || '';
+    return {
+      id: linha.dataset.id, nome: pega('nome').trim(), cargo: pega('cargo').trim(),
+      email: pega('email').trim(), telefone: pega('telefone').trim()
+    };
+  }).filter((k) => k.nome || k.email || k.telefone);
 }
 
 acoes.novoCliente = () => abrirModal('Novo cliente', formCliente(null));
@@ -1467,8 +2416,8 @@ acoes.salvarCliente = (el, d) => {
   if (!c) { c = { id: uid(), criadoEm: hoje() }; base.clientes.push(c); }
   c.nome = nome;
   c.setor = $('#cl-setor').value.trim();
-  c.contatoNome = $('#cl-contato').value.trim();
-  c.contatoEmail = $('#cl-email').value.trim();
+  c.contatos = lerContatos();
+  c.pacotePadrao = lerPacote('clp');
   c.obs = $('#cl-obs').value;
   salvar(); fecharModal(); render();
 };
@@ -1483,7 +2432,7 @@ acoes.excluirCliente = (el, d) => {
 
 function telaRelatorios() {
   return `
-  <h1>Relatórios</h1>
+  ${cabecalho('Saídas', 'Relatórios', 'Para mandar ao cliente, arquivar no dossiê ou abrir no Excel.')}
   <div class="grade g2">
     <div class="cartao">
       <h3>Progresso do assignment</h3>
@@ -1578,8 +2527,8 @@ function relatorioAssignment(id) {
     return `<tr>
       <td><strong>${esc(c.nome || '—')}</strong><div class="subtexto">${esc(c.cargoAtual || '')}${c.empresaAtual ? ' — ' + esc(c.empresaAtual) : ''}</div></td>
       <td>${esc(v.etapa)}</td>
-      <td>${v.fit ? esc(v.fit) + '/5' : '—'}</td>
-      <td>${diasDesde(v.etapaDesde || v.entrouEm)} d</td>
+      <td>${v.fit ? pontosFit(v.fit) : '—'}</td>
+      <td class="num">${diasDesde(v.etapaDesde || v.entrouEm)} d</td>
       <td class="subtexto">${esc((v.parecer || '').slice(0, 220))}</td></tr>`;
   }).join('');
 
@@ -1603,34 +2552,70 @@ function relatorioAssignment(id) {
   <div class="relatorio" id="area-relatorio">
     <h1>Relatório de progresso — ${esc(a.titulo)}</h1>
     <p class="subtexto">${esc(nomeCliente(a.clienteId))}${a.localizacao ? ' · ' + esc(a.localizacao) : ''}
-      ${a.consultor ? ' · Consultor: ' + esc(a.consultor) : ''}<br>
+      ${a.consultor ? ' · Consultor: ' + esc(a.consultor) : ''}${contatoDoAssignment(a) ? ' · Contato: ' + esc(contatoDoAssignment(a).nome) : ''}<br>
       Aberto em ${fmtData(a.abertoEm)} (${diasDesde(a.abertoEm)} dias) ·
       Status: ${esc(a.status)}${a.prazoAlvo ? ' · Prazo alvo: ' + fmtData(a.prazoAlvo) : ''}<br>
       Emitido em ${fmtData(hoje())}</p>
 
     <h2>Resumo</h2>
     <table><tbody>
-      <tr><th>Profissionais mapeados</th><td>${total}</td></tr>
-      <tr><th>Em processo ativo</th><td>${(a.candidatos || []).filter((v) => (v.situacao || 'Ativo') === 'Ativo').length}</td></tr>
-      <tr><th>Na short list</th><td>${passaramPor(a, 'Short list')}</td></tr>
-      <tr><th>Fora do processo</th><td>${fora.length}</td></tr>
-      <tr><th>Contratados</th><td>${(a.candidatos || []).filter((v) => v.situacao === 'Contratado').length}</td></tr>
+      <tr><th>Profissionais mapeados</th><td class="num">${total}</td></tr>
+      <tr><th>Em processo ativo</th><td class="num">${(a.candidatos || []).filter((v) => (v.situacao || 'Ativo') === 'Ativo').length}</td></tr>
+      <tr><th>Na short list</th><td class="num">${passaramPor(a, 'Short list')}</td></tr>
+      <tr><th>Fora do processo</th><td class="num">${fora.length}</td></tr>
+      <tr><th>Contratados</th><td class="num">${(a.candidatos || []).filter((v) => v.situacao === 'Contratado').length}</td></tr>
     </tbody></table>
 
     <h2>Funil</h2>
-    <table><thead><tr><th>Etapa</th><th>Passaram</th><th>Estão agora</th><th>Conversão da anterior</th><th>% do total</th><th>Tempo médio</th></tr></thead>
-      <tbody>${linhasFunil}</tbody></table>
+    <div class="rolagem"><table><thead><tr><th>Etapa</th><th>Passaram</th><th>Estão agora</th><th>Conversão da anterior</th><th>% do total</th><th>Tempo médio</th></tr></thead>
+      <tbody>${linhasFunil}</tbody></table></div>
 
     <h2>Candidatos em processo</h2>
-    ${linhasCand ? `<table><thead><tr><th>Profissional</th><th>Etapa</th><th>Fit</th><th>Na etapa há</th><th>Parecer</th></tr></thead><tbody>${linhasCand}</tbody></table>`
+    ${linhasCand ? `<div class="rolagem"><table><thead><tr><th>Profissional</th><th>Etapa</th><th>Fit</th><th>Na etapa há</th><th>Parecer</th></tr></thead><tbody>${linhasCand}</tbody></table></div>`
       : '<p class="subtexto">Nenhum candidato ativo.</p>'}
 
-    ${linhasFora ? `<h2>Saíram do processo</h2><table><thead><tr><th>Profissional</th><th>Situação</th><th>Motivo</th></tr></thead><tbody>${linhasFora}</tbody></table>` : ''}
+    ${linhasFora ? `<h2>Saíram do processo</h2><div class="rolagem"><table><thead><tr><th>Profissional</th><th>Situação</th><th>Motivo</th></tr></thead><tbody>${linhasFora}</tbody></table></div>` : ''}
 
     ${movs ? `<h2>Movimentações recentes</h2><ul>${movs}</ul>` : ''}
 
-    ${a.descricao ? `<h2>Posição</h2><p class="subtexto">${nl2br(a.descricao)}</p>` : ''}
+    ${blocoPosicaoRelatorio(a)}
   </div>`;
+}
+
+function contatoDoAssignment(a) {
+  const cliente = acharCliente(a.clienteId);
+  return ((cliente || {}).contatos || []).find((k) => k.id === a.contatoId) || null;
+}
+
+/** Job spec e pacote no fim do relatório de progresso. */
+function blocoPosicaoRelatorio(a) {
+  const js = a.jobSpec || {};
+  const p = a.pacote || {};
+  const comp = (tipo) => (js.competencias || []).filter((c) => (c.tipo || 'Obrigatória') === tipo)
+    .map((c) => esc(c.nome) + (c.anos ? ` (${esc(c.anos)} anos)` : '')).join(' · ');
+  const obrig = comp('Obrigatória');
+  const desej = comp('Desejável');
+  const partes = [];
+
+  if (js.missao) partes.push(`<h2>A posição</h2><p>${nl2br(js.missao)}</p>`);
+  if ((js.entregas || []).length) {
+    partes.push(`<h2>Entregas esperadas</h2><ul>${js.entregas.map((e) => `<li>${esc(e)}</li>`).join('')}</ul>`);
+  }
+  if (obrig || desej || (js.formacao || []).length || (js.idiomas || []).length) {
+    partes.push(`<h2>Perfil buscado</h2><table><tbody>
+      ${obrig ? `<tr><th>Obrigatório</th><td>${obrig}</td></tr>` : ''}
+      ${desej ? `<tr><th>Desejável</th><td>${desej}</td></tr>` : ''}
+      ${(js.formacao || []).length ? `<tr><th>Formação</th><td>${js.formacao.map((f) =>
+        esc([f.nivel, f.curso].filter(Boolean).join(' em ')) + (f.instituicao ? ' — ' + esc(f.instituicao) : '') +
+        (f.exigencia ? ` <span class="subtexto">(${esc(f.exigencia)})</span>` : '')).join('<br>')}</td></tr>` : ''}
+      ${(js.idiomas || []).length ? `<tr><th>Idiomas</th><td>${js.idiomas.map((i) =>
+        esc(i.idioma) + (i.nivel ? ' — ' + esc(i.nivel) : '')).join('<br>')}</td></tr>` : ''}
+      ${(js.empresasAlvo || []).length ? `<tr><th>Empresas-alvo</th><td>${esc(js.empresasAlvo.join(', '))}</td></tr>` : ''}
+      ${(js.empresasEvitar || []).length ? `<tr><th>Off-limits</th><td>${esc(js.empresasEvitar.join(', '))}</td></tr>` : ''}
+    </tbody></table>`);
+  }
+  if (pacotePreenchido(p)) partes.push(`<h2>Pacote</h2>${tabelaPacote(p)}`);
+  return partes.join('');
 }
 
 function relatorioCandidato(id) {
@@ -1678,13 +2663,13 @@ function relatorioCandidato(id) {
     ${(c.idiomas || []).length ? `<h2>Idiomas</h2><p>${esc(c.idiomas.join(' · '))}</p>` : ''}
 
     <h2>Remuneração e disponibilidade</h2>
-    <table><tbody>
+    <div class="rolagem"><table><tbody>
       <tr><th>Atual</th><td>${esc((c.remuneracao || {}).atual || '—')}</td></tr>
       <tr><th>Pretensão</th><td>${esc((c.remuneracao || {}).pretendida || '—')}</td></tr>
       <tr><th>Disponibilidade</th><td>${esc(c.disponibilidade || '—')}</td></tr>
-    </tbody></table>
+    </tbody></table></div>
 
-    ${historico ? `<h2>Processos</h2><table><thead><tr><th>Assignment</th><th>Situação</th><th>Trajetória</th></tr></thead><tbody>${historico}</tbody></table>` : ''}
+    ${historico ? `<h2>Processos</h2><div class="rolagem"><table><thead><tr><th>Assignment</th><th>Situação</th><th>Trajetória</th></tr></thead><tbody>${historico}</tbody></table></div>` : ''}
     ${pareceres ? `<h2>Pareceres do consultor</h2><ul>${pareceres}</ul>` : ''}
     ${notas ? `<h2>Anotações</h2><ul>${notas}</ul>` : ''}
 
@@ -1789,7 +2774,18 @@ acoes.carregarExemplo = () => {
   if (base.candidatos.length || base.assignments.length) {
     if (!confirm('Já existem dados. Adicionar o exemplo mesmo assim?')) return;
   }
-  const cliente = { id: uid(), nome: 'Aurora Alimentos', setor: 'Bens de consumo', contatoNome: 'Marina Prado', contatoEmail: 'marina@exemplo.com', criadoEm: hoje() };
+  const contatoRh = { id: uid(), nome: 'Marina Prado', cargo: 'Diretora de Gente', email: 'marina@exemplo.com', telefone: '(11) 3000-1000' };
+  const contatoCeo = { id: uid(), nome: 'Paulo Serra', cargo: 'CEO', email: 'paulo@exemplo.com', telefone: '' };
+  const cliente = {
+    id: uid(), nome: 'Aurora Alimentos', setor: 'Bens de consumo', criadoEm: hoje(),
+    contatos: [contatoRh, contatoCeo],
+    pacotePadrao: {
+      fixoMensal: '45.000', fixoAnual: '', bonusTipo: 'percentual', bonusValor: '40',
+      bonusDescricao: '60% metas da companhia, 40% individuais',
+      beneficios: ['Plano de saúde', 'Previdência privada', 'Carro / auxílio combustível', 'PLR'],
+      outros: '', observacao: ''
+    }
+  };
   base.clientes.push(cliente);
 
   const modelos = [
@@ -1800,10 +2796,34 @@ acoes.carregarExemplo = () => {
 
   const assignment = {
     id: uid(), titulo: 'Diretor(a) Comercial Brasil', clienteId: cliente.id,
+    contatoId: contatoRh.id, consultorId: (eu || {}).id || '', consultor: (eu || {}).nome || 'Consultor',
     cargo: 'Diretor Comercial', localizacao: 'São Paulo, SP', senioridade: 'Diretoria',
-    consultor: 'Isa', status: 'Aberto', abertoEm: new Date(Date.now() - 32 * 86400000).toISOString(),
-    faixaSalarial: 'R$ 45–60k + bônus', descricao: 'Posição criada para liderar a expansão do canal indireto no Brasil, reportando ao CEO.',
-    etapas: ETAPAS_PADRAO.slice(), candidatos: [], criadoEm: hoje()
+    status: 'Aberto', abertoEm: new Date(Date.now() - 32 * 86400000).toISOString(),
+    processoId: (base.configuracao || configuracaoPadrao()).processoPadraoId,
+    etapas: ETAPAS_PADRAO.slice(), candidatos: [], criadoEm: hoje(),
+    pacote: JSON.parse(JSON.stringify(cliente.pacotePadrao)),
+    jobSpec: {
+      missao: 'Liderar a expansão do canal indireto no Brasil, reportando ao CEO, com P&L de R$ 1,2 bi e time de 240 pessoas.',
+      entregas: ['Dobrar a receita do canal indireto em 24 meses',
+        'Reestruturar a régua de distribuidores',
+        'Montar a área de trade marketing'],
+      competencias: [
+        { nome: 'Canal indireto / distribuidores', tipo: 'Obrigatória', anos: '8' },
+        { nome: 'Gestão de P&L', tipo: 'Obrigatória', anos: '5' },
+        { nome: 'Trade marketing', tipo: 'Desejável', anos: '' },
+        { nome: 'Bens de consumo', tipo: 'Desejável', anos: '' }
+      ],
+      formacao: [{ curso: 'Administração ou Engenharia', instituicao: '', nivel: 'Graduação', exigencia: 'Obrigatória' },
+        { curso: 'Gestão comercial', instituicao: 'FGV, Insper', nivel: 'MBA', exigencia: 'Desejável' }],
+      idiomas: [{ idioma: 'Inglês', nivel: 'Avançado', exigencia: 'Obrigatório' },
+        { idioma: 'Espanhol', nivel: 'Intermediário', exigencia: 'Desejável' }],
+      titulosAlvo: ['Diretor Comercial', 'Head of Sales', 'Diretor de Vendas'],
+      localizacoes: ['São Paulo'],
+      empresasAlvo: ['Vitalis Foods', 'Grupo Serrano', 'Nordeste Bebidas'],
+      empresasEvitar: ['Aurora Alimentos'],
+      observacoes: ''
+    },
+    descricao: 'Liderar a expansão do canal indireto no Brasil, reportando ao CEO.'
   };
 
   modelos.forEach((m, i) => {
@@ -1834,15 +2854,575 @@ acoes.carregarExemplo = () => {
 
 /* ---------------------------- inicialização ---------------------------- */
 
-window.addEventListener('hashchange', render);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharModal(); });
 
-document.addEventListener('DOMContentLoaded', () => {
+
+/* ================================================================
+ * Controle de acesso
+ *
+ * Com servidor, o login é de verdade: a senha vai por POST, é guardada
+ * como hash (scrypt) e a sessão é um cookie HttpOnly — o navegador nunca
+ * vê a base sem estar logado.
+ *
+ * Sem servidor (arquivo local ou versão online), a base inteira mora no
+ * navegador de quem abre. Aqui o login é uma tranca de porta: separa
+ * papéis e evita que alguém mexa por engano, mas não protege o dado de
+ * quem tem acesso à máquina. A própria tela de acesso avisa isso.
+ * ================================================================ */
+
+const PAPEIS = {
+  admin: { nome: 'Administrador', descricao: 'Faz tudo, inclusive criar e gerir usuários.' },
+  consultor: { nome: 'Consultor', descricao: 'Trabalha assignments, candidatos e relatórios.' },
+  leitura: { nome: 'Somente leitura', descricao: 'Consulta e imprime relatórios, sem alterar nada.' }
+};
+const ADMIN_EMAIL_PADRAO = 'admin@recrutamento.local';
+const ADMIN_SENHA_PADRAO = 'Admin@2026';
+const SESSAO_LOCAL = 'recrut.sessao';
+const HORAS_SESSAO_LOCAL = 12;
+
+let eu = null;
+
+const ehAdmin = () => !!eu && eu.papel === 'admin';
+const podeEditar = () => !!eu && eu.papel !== 'leitura';
+
+function iniciais(nome) {
+  const partes = String(nome || '?').trim().split(/\s+/).filter(Boolean);
+  if (!partes.length) return '?';
+  return (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase();
+}
+
+/* ---- hash local (só usado quando não há servidor) ---- */
+
+async function hashLocal(senha, sal) {
+  const cod = new TextEncoder();
+  if (!(window.crypto && crypto.subtle)) {
+    // Navegador antigo: guarda um resumo fraco, mas nunca a senha em claro.
+    let h = 0;
+    const texto = sal + '::' + senha;
+    for (let i = 0; i < texto.length; i++) { h = (h * 31 + texto.charCodeAt(i)) >>> 0; }
+    return 'fraco:' + h.toString(16);
+  }
+  const chave = await crypto.subtle.importKey('raw', cod.encode(senha), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: cod.encode(sal), iterations: 150000, hash: 'SHA-256' }, chave, 256);
+  return Array.from(new Uint8Array(bits)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+function forcaDaSenha(senha) {
+  const t = String(senha || '');
+  if (t.length < 8) return 'A senha precisa de pelo menos 8 caracteres.';
+  if (!/[A-Za-zÀ-ÿ]/.test(t) || !/\d/.test(t)) return 'A senha precisa misturar letras e números.';
+  return null;
+}
+
+async function garantirAdminLocal() {
+  if ((base.usuarios || []).length) return;
+  const sal = uid();
+  base.usuarios = [{
+    id: uid(), nome: 'Administrador', email: ADMIN_EMAIL_PADRAO, papel: 'admin', ativo: true,
+    sal, hash: await hashLocal(ADMIN_SENHA_PADRAO, sal), precisaTrocarSenha: true, criadoEm: hoje()
+  }];
+  localStorage.setItem('recrut.base', JSON.stringify(base));
+}
+
+function sessaoLocal() {
+  try {
+    const guardado = JSON.parse(localStorage.getItem(SESSAO_LOCAL) || 'null');
+    if (!guardado || guardado.expira < Date.now()) return null;
+    const u = (base.usuarios || []).find((x) => x.id === guardado.usuarioId);
+    return u && u.ativo !== false ? usuarioPublico(u) : null;
+  } catch (e) { return null; }
+}
+
+function usuarioPublico(u) {
+  return {
+    id: u.id, nome: u.nome, email: u.email, papel: u.papel, ativo: u.ativo !== false,
+    criadoEm: u.criadoEm, ultimoAcesso: u.ultimoAcesso, precisaTrocarSenha: !!u.precisaTrocarSenha
+  };
+}
+
+/* ---- operações de acesso (mesma interface nos dois modos) ---- */
+
+const Acesso = {
+  async entrar(email, senha) {
+    if (!modoLocal) {
+      const r = await fetch('api/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+      });
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui entrar.');
+      return resp.usuario;
+    }
+    const alvo = (base.usuarios || []).find((u) => (u.email || '').toLowerCase() === String(email).trim().toLowerCase());
+    if (!alvo || alvo.ativo === false) throw new Error('Usuário ou senha não conferem.');
+    const hash = await hashLocal(senha, alvo.sal);
+    if (hash !== alvo.hash) throw new Error('Usuário ou senha não conferem.');
+    alvo.ultimoAcesso = hoje();
+    localStorage.setItem('recrut.base', JSON.stringify(base));
+    localStorage.setItem(SESSAO_LOCAL, JSON.stringify({
+      usuarioId: alvo.id, expira: Date.now() + HORAS_SESSAO_LOCAL * 3600e3
+    }));
+    return usuarioPublico(alvo);
+  },
+
+  async sair() {
+    if (!modoLocal) { try { await fetch('api/logout', { method: 'POST' }); } catch (e) { /* segue */ } }
+    else localStorage.removeItem(SESSAO_LOCAL);
+    eu = null;
+    location.hash = '';
+    mostrarAcesso();
+  },
+
+  async trocarSenha(senhaAtual, novaSenha) {
+    if (!modoLocal) {
+      const r = await fetch('api/senha', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senhaAtual, novaSenha })
+      });
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui trocar a senha.');
+      return;
+    }
+    const alvo = base.usuarios.find((u) => u.id === eu.id);
+    if (await hashLocal(senhaAtual, alvo.sal) !== alvo.hash) throw new Error('A senha atual não confere.');
+    const problema = forcaDaSenha(novaSenha);
+    if (problema) throw new Error(problema);
+    alvo.sal = uid();
+    alvo.hash = await hashLocal(novaSenha, alvo.sal);
+    alvo.precisaTrocarSenha = false;
+    localStorage.setItem('recrut.base', JSON.stringify(base));
+  },
+
+  async listar() {
+    if (!modoLocal) {
+      const r = await fetch('api/usuarios');
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui listar os usuários.');
+      return resp.usuarios;
+    }
+    return (base.usuarios || []).map(usuarioPublico);
+  },
+
+  async criar(dados) {
+    const problema = forcaDaSenha(dados.senha);
+    if (problema) throw new Error(problema);
+    if (!modoLocal) {
+      const r = await fetch('api/usuarios', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados)
+      });
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui criar o usuário.');
+      return resp.usuario;
+    }
+    const email = String(dados.email || '').trim().toLowerCase();
+    if (!dados.nome || !email) throw new Error('Informe nome e e-mail.');
+    if (base.usuarios.some((u) => (u.email || '').toLowerCase() === email)) {
+      throw new Error('Já existe usuário com esse e-mail.');
+    }
+    const sal = uid();
+    const novo = {
+      id: uid(), nome: String(dados.nome).trim(), email, papel: dados.papel || 'consultor',
+      ativo: true, sal, hash: await hashLocal(dados.senha, sal), precisaTrocarSenha: true, criadoEm: hoje()
+    };
+    base.usuarios.push(novo);
+    localStorage.setItem('recrut.base', JSON.stringify(base));
+    return usuarioPublico(novo);
+  },
+
+  async atualizar(id, dados) {
+    if (dados.novaSenha) {
+      const problema = forcaDaSenha(dados.novaSenha);
+      if (problema) throw new Error(problema);
+    }
+    if (!modoLocal) {
+      const r = await fetch('api/usuarios/' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dados)
+      });
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui salvar.');
+      return resp.usuario;
+    }
+    const alvo = base.usuarios.find((u) => u.id === id);
+    if (!alvo) throw new Error('Usuário não encontrado.');
+    const admins = base.usuarios.filter((u) => u.papel === 'admin' && u.ativo !== false);
+    if (dados.nome != null) alvo.nome = String(dados.nome).trim() || alvo.nome;
+    if (dados.papel && dados.papel !== alvo.papel) {
+      if (alvo.papel === 'admin' && admins.length < 2) throw new Error('Precisa sobrar pelo menos um administrador.');
+      alvo.papel = dados.papel;
+    }
+    if (dados.ativo != null) {
+      if (!dados.ativo && alvo.papel === 'admin' && admins.length < 2) {
+        throw new Error('Precisa sobrar pelo menos um administrador ativo.');
+      }
+      alvo.ativo = !!dados.ativo;
+    }
+    if (dados.novaSenha) {
+      alvo.sal = uid();
+      alvo.hash = await hashLocal(dados.novaSenha, alvo.sal);
+      alvo.precisaTrocarSenha = true;
+    }
+    localStorage.setItem('recrut.base', JSON.stringify(base));
+    return usuarioPublico(alvo);
+  },
+
+  async excluir(id) {
+    if (id === eu.id) throw new Error('Não dá para excluir o próprio usuário.');
+    if (!modoLocal) {
+      const r = await fetch('api/usuarios/' + id, { method: 'DELETE' });
+      const resp = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(resp.erro || 'Não consegui excluir.');
+      return;
+    }
+    const alvo = base.usuarios.find((u) => u.id === id);
+    const admins = base.usuarios.filter((u) => u.papel === 'admin' && u.ativo !== false);
+    if (alvo.papel === 'admin' && admins.length < 2) throw new Error('Precisa sobrar pelo menos um administrador.');
+    base.usuarios = base.usuarios.filter((u) => u.id !== id);
+    localStorage.setItem('recrut.base', JSON.stringify(base));
+  }
+};
+
+/* ---- telas de acesso ---- */
+
+function mostrarAcesso(mensagem) {
+  $('#aplicativo').classList.add('escondido');
+  $('#acesso').classList.remove('escondido');
+  const erro = $('#acesso-erro');
+  if (mensagem) { erro.textContent = mensagem; erro.classList.remove('escondido'); }
+  else erro.classList.add('escondido');
+
+  const primeiroAcesso = modoLocal &&
+    (base.usuarios || []).length === 1 && base.usuarios[0].precisaTrocarSenha;
+  $('#acesso-nota').innerHTML = modoLocal
+    ? (primeiroAcesso
+        ? `<strong>Primeiro acesso:</strong> usuário <code>${ADMIN_EMAIL_PADRAO}</code>,
+           senha <code>${ADMIN_SENHA_PADRAO}</code>. O sistema pede a troca assim que você entrar.<br><br>
+           Esta é a versão sem servidor: a base fica guardada neste navegador, então o login organiza
+           quem faz o quê, mas não protege os dados de quem tem acesso a este computador. Para controle
+           de acesso de verdade, rode a versão com servidor.`
+        : `Versão sem servidor: a base fica guardada neste navegador. O login separa os papéis, mas não
+           protege os dados de quem tem acesso a este computador — para isso, rode a versão com servidor.`)
+    : 'Acesso restrito. Se você não tem usuário, peça ao administrador.';
+  setTimeout(() => { const c = $('#ac-email'); if (c) c.focus(); }, 60);
+}
+
+function mostrarApp() {
+  $('#acesso').classList.add('escondido');
+  $('#aplicativo').classList.remove('escondido');
+  $('#eu-nome').textContent = eu.nome;
+  $('#eu-papel').textContent = (PAPEIS[eu.papel] || {}).nome || eu.papel;
+  $('#eu-avatar').textContent = iniciais(eu.nome);
+  $('#menu-usuarios').classList.toggle('escondido', !ehAdmin());
+  $('#menu-configuracoes').classList.toggle('escondido', !ehAdmin());
+}
+
+function formTrocaSenha(obrigatoria) {
+  return `
+  ${obrigatoria ? '<p class="subtexto">Esta é a senha inicial do sistema. Escolha uma sua antes de continuar.</p>' : ''}
+  <div class="campo"><label for="ts-atual">Senha atual</label>
+    <input id="ts-atual" type="password" autocomplete="current-password"></div>
+  <div class="campo"><label for="ts-nova">Nova senha</label>
+    <input id="ts-nova" type="password" autocomplete="new-password">
+    <div class="dica">Mínimo de 8 caracteres, misturando letras e números.</div></div>
+  <div class="campo"><label for="ts-confirma">Repita a nova senha</label>
+    <input id="ts-confirma" type="password" autocomplete="new-password"></div>
+  <div id="ts-erro" class="acesso-erro escondido"></div>
+  <div class="linha">
+    <button class="btn" data-acao="salvarTrocaSenha">Trocar senha</button>
+    ${obrigatoria ? '' : '<button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>'}
+  </div>`;
+}
+
+acoes.abrirConta = () => {
+  abrirModal('Minha conta', `
+    <div class="linha" style="gap:12px;margin-bottom:18px">
+      <div class="avatar avatar-g">${esc(iniciais(eu.nome))}</div>
+      <div>
+        <strong style="font-size:16px">${esc(eu.nome)}</strong>
+        <div class="subtexto">${esc(eu.email)} · ${esc((PAPEIS[eu.papel] || {}).nome || eu.papel)}</div>
+      </div>
+    </div>
+    <h3>Trocar senha</h3>
+    ${formTrocaSenha(false)}`);
+};
+
+acoes.salvarTrocaSenha = async (el) => {
+  const erro = $('#ts-erro');
+  const mostrar = (t) => { erro.textContent = t; erro.classList.remove('escondido'); };
+  const nova = $('#ts-nova').value;
+  if (nova !== $('#ts-confirma').value) { mostrar('As duas senhas novas não são iguais.'); return; }
+  el.disabled = true;
+  try {
+    await Acesso.trocarSenha($('#ts-atual').value, nova);
+    eu.precisaTrocarSenha = false;
+    fecharModal();
+    aviso('Senha trocada.');
+    render();
+  } catch (e) { mostrar(e.message); }
+  el.disabled = false;
+};
+
+acoes.sair = () => Acesso.sair();
+
+/* ---------------------------- tela de usuários ---------------------------- */
+
+let usuariosCache = [];
+
+function telaUsuarios() {
+  if (!ehAdmin()) return '<div class="vazio">Só o administrador acessa esta área.</div>';
+  const linhas = usuariosCache.map((u) => `
+    <tr class="clicavel" data-acao="editarUsuario" data-id="${u.id}">
+      <td>
+        <div class="linha" style="gap:10px;flex-wrap:nowrap">
+          <div class="avatar avatar-p">${esc(iniciais(u.nome))}</div>
+          <div><strong>${esc(u.nome)}</strong><div class="subtexto">${esc(u.email)}</div></div>
+        </div>
+      </td>
+      <td><span class="tag ${u.papel === 'admin' ? 'tag-latao' : u.papel === 'leitura' ? 'tag-cinza' : 'tag-azul'}">${esc((PAPEIS[u.papel] || {}).nome || u.papel)}</span></td>
+      <td>${u.ativo ? '<span class="tag tag-verde">ativo</span>' : '<span class="tag tag-vermelha">inativo</span>'}
+        ${u.precisaTrocarSenha ? '<span class="tag tag-amarela">senha inicial</span>' : ''}</td>
+      <td class="num subtexto">${u.ultimoAcesso ? fmtData(u.ultimoAcesso) : '—'}</td>
+    </tr>`).join('');
+
+  return `
+  ${cabecalho('Administração', 'Usuários', 'Quem entra no sistema e o que cada um pode fazer.',
+    '<button class="btn" data-acao="novoUsuario">+ Novo usuário</button>')}
+  <div class="cartao">
+    <div class="rolagem">
+      <table><thead><tr><th>Pessoa</th><th>Papel</th><th>Situação</th><th>Último acesso</th></tr></thead>
+      <tbody>${linhas || '<tr><td colspan="4" class="subtexto">Nenhum usuário.</td></tr>'}</tbody></table>
+    </div>
+  </div>
+  <div class="cartao">
+    <h3>O que cada papel pode</h3>
+    <div class="grade g3">
+      ${Object.keys(PAPEIS).map((k) => `<div>
+        <div class="eyebrow" style="margin-bottom:6px">${esc(PAPEIS[k].nome)}</div>
+        <div class="subtexto">${esc(PAPEIS[k].descricao)}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function formUsuario(u) {
+  const novo = !u;
+  u = u || { papel: 'consultor', ativo: true };
+  return `
+  <div class="grade g2">
+    <div class="campo"><label>Nome</label><input id="u-nome" value="${esc(u.nome || '')}"></div>
+    <div class="campo"><label>E-mail (é o login)</label>
+      <input id="u-email" value="${esc(u.email || '')}" ${novo ? '' : 'disabled'} autocapitalize="none" spellcheck="false"></div>
+    <div class="campo"><label>Papel</label><select id="u-papel">
+      ${Object.keys(PAPEIS).map((k) => `<option value="${k}" ${k === u.papel ? 'selected' : ''}>${esc(PAPEIS[k].nome)}</option>`).join('')}
+    </select></div>
+    ${novo ? '' : `<div class="campo"><label>Situação</label><select id="u-ativo">
+      <option value="1" ${u.ativo ? 'selected' : ''}>Ativo</option>
+      <option value="0" ${!u.ativo ? 'selected' : ''}>Inativo (não consegue entrar)</option></select></div>`}
+  </div>
+  <div class="campo"><label>${novo ? 'Senha inicial' : 'Definir nova senha (opcional)'}</label>
+    <input id="u-senha" type="text" value="${novo ? esc(senhaSugerida()) : ''}" placeholder="${novo ? '' : 'deixe vazio para manter'}">
+    <div class="dica">Mínimo de 8 caracteres com letras e números. A pessoa troca no primeiro acesso —
+      anote e entregue a senha por um canal seguro.</div></div>
+  <div id="u-erro" class="acesso-erro escondido"></div>
+  <div class="linha">
+    <button class="btn" data-acao="salvarUsuario" data-id="${u.id || ''}">Salvar</button>
+    <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
+    ${novo || u.id === eu.id ? '' : `<button class="btn btn-perigo espaco" data-acao="excluirUsuario" data-id="${u.id}">Excluir</button>`}
+  </div>`;
+}
+
+function senhaSugerida() {
+  const palavras = ['Serra', 'Aurora', 'Vento', 'Farol', 'Prisma', 'Cedro', 'Barca', 'Norte'];
+  const i = Math.floor(Math.random() * palavras.length);
+  const n = 100 + Math.floor(Math.random() * 900);
+  return palavras[i] + n + '!';
+}
+
+acoes.novoUsuario = () => abrirModal('Novo usuário', formUsuario(null));
+acoes.editarUsuario = (el, d) => abrirModal('Usuário', formUsuario(usuariosCache.find((u) => u.id === d.id)));
+
+acoes.salvarUsuario = async (el, d) => {
+  const erro = $('#u-erro');
+  const mostrar = (t) => { erro.textContent = t; erro.classList.remove('escondido'); };
+  el.disabled = true;
+  try {
+    if (d.id) {
+      const dados = { nome: $('#u-nome').value, papel: $('#u-papel').value, ativo: $('#u-ativo').value === '1' };
+      const senha = $('#u-senha').value.trim();
+      if (senha) dados.novaSenha = senha;
+      await Acesso.atualizar(d.id, dados);
+    } else {
+      await Acesso.criar({
+        nome: $('#u-nome').value, email: $('#u-email').value,
+        papel: $('#u-papel').value, senha: $('#u-senha').value.trim()
+      });
+    }
+    usuariosCache = await Acesso.listar();
+    fecharModal(); render();
+    aviso(d.id ? 'Usuário atualizado.' : 'Usuário criado.');
+  } catch (e) { mostrar(e.message); }
+  el.disabled = false;
+};
+
+acoes.excluirUsuario = async (el, d) => {
+  if (!confirm('Excluir este usuário? Ele perde o acesso na hora.')) return;
+  try {
+    await Acesso.excluir(d.id);
+    usuariosCache = await Acesso.listar();
+    fecharModal(); render();
+  } catch (e) { aviso(e.message, 5000); }
+};
+
+/* ---------------------------- configurações da consultoria ---------------------------- */
+
+function telaConfiguracoes() {
+  if (!ehAdmin()) return '<div class="vazio">Só o administrador acessa as configurações.</div>';
+  const cfg = base.configuracao || configuracaoPadrao();
+
+  const processos = cfg.processos.map((pr) => `
+    <div class="cartao" style="box-shadow:none;margin-bottom:10px">
+      <div class="linha">
+        <div>
+          <strong>${esc(pr.nome)}</strong>
+          ${pr.id === cfg.processoPadraoId ? '<span class="tag tag-latao">padrão</span>' : ''}
+          <div class="subtexto">${pr.etapas.length} etapas · ${esc(pr.etapas.join(' → '))}</div>
+        </div>
+        <div class="espaco"></div>
+        <button class="btn btn-sec btn-mini" data-acao="editarProcesso" data-id="${pr.id}">Editar</button>
+        ${pr.id === cfg.processoPadraoId ? '' :
+          `<button class="btn btn-fantasma btn-mini" data-acao="tornarProcessoPadrao" data-id="${pr.id}">Tornar padrão</button>
+           <button class="btn btn-fantasma btn-mini" data-acao="excluirProcesso" data-id="${pr.id}">Excluir</button>`}
+      </div>
+    </div>`).join('');
+
+  return `
+  ${cabecalho('Administração', 'Configurações', 'Os padrões da consultoria: processo de seleção, benefícios e moeda.')}
+
+  <div class="cartao">
+    <div class="linha" style="margin-bottom:12px">
+      <h2 style="margin:0">Processos de seleção</h2>
+      <div class="espaco"></div>
+      <button class="btn" data-acao="novoProcesso">+ Novo processo</button>
+    </div>
+    <p class="subtexto" style="margin-bottom:14px">Ao abrir um assignment você escolhe um destes; as etapas
+      podem ser ajustadas naquela busca sem mexer no padrão.</p>
+    ${processos}
+  </div>
+
+  <div class="cartao">
+    <h2>Benefícios e moeda</h2>
+    <div class="campo"><label>Moeda</label>
+      <input id="cfg-moeda" value="${esc(cfg.moeda || 'R$')}" style="max-width:120px"></div>
+    <div class="campo"><label>Benefícios oferecidos nos pacotes (um por linha)</label>
+      <textarea id="cfg-beneficios" style="min-height:170px">${esc((cfg.beneficios || []).join('\n'))}</textarea>
+      <div class="dica">Estes viram as caixinhas do pacote, no cliente e no assignment.</div></div>
+    <button class="btn" data-acao="salvarConfiguracoes">Salvar</button>
+  </div>`;
+}
+
+acoes.salvarConfiguracoes = () => {
+  base.configuracao.moeda = $('#cfg-moeda').value.trim() || 'R$';
+  base.configuracao.beneficios = porLinha($('#cfg-beneficios').value);
+  salvar(); render(); aviso('Configurações salvas.');
+};
+
+function formProcesso(pr) {
+  pr = pr || { nome: '', etapas: ETAPAS_PADRAO.slice() };
+  return `
+  <div class="campo"><label>Nome do processo</label>
+    <input id="pr-nome" value="${esc(pr.nome || '')}" placeholder="Ex.: Executive search (padrão)"></div>
+  <div class="campo"><label>Etapas, na ordem (uma por linha)</label>
+    <textarea id="pr-etapas" style="min-height:180px">${esc((pr.etapas || []).join('\n'))}</textarea>
+    <div class="dica">Assignments já abertos mantêm as etapas que estão usando — mudar aqui vale para os próximos.</div></div>
+  <div class="linha">
+    <button class="btn" data-acao="salvarProcesso" data-id="${pr.id || ''}">Salvar</button>
+    <button class="btn btn-fantasma" data-acao="fecharModal">Cancelar</button>
+  </div>`;
+}
+
+acoes.novoProcesso = () => abrirModal('Novo processo de seleção', formProcesso(null));
+acoes.editarProcesso = (el, d) =>
+  abrirModal('Processo de seleção', formProcesso(base.configuracao.processos.find((pr) => pr.id === d.id)));
+
+acoes.salvarProcesso = (el, d) => {
+  const nome = $('#pr-nome').value.trim();
+  const etapas = porLinha($('#pr-etapas').value);
+  if (!nome) { aviso('Dê um nome ao processo.'); return; }
+  if (etapas.length < 2) { aviso('Um processo precisa de pelo menos duas etapas.'); return; }
+  const cfg = base.configuracao;
+  let pr = d.id ? cfg.processos.find((x) => x.id === d.id) : null;
+  if (!pr) { pr = { id: uid() }; cfg.processos.push(pr); }
+  pr.nome = nome;
+  pr.etapas = etapas;
+  salvar(); fecharModal(); render();
+};
+
+acoes.tornarProcessoPadrao = (el, d) => {
+  base.configuracao.processoPadraoId = d.id;
+  salvar(); render();
+};
+
+acoes.excluirProcesso = (el, d) => {
+  const cfg = base.configuracao;
+  if (base.assignments.some((a) => a.processoId === d.id)) {
+    aviso('Há assignments usando este processo. Eles continuam com as etapas atuais, mas o processo não pode sumir.', 6000);
+    return;
+  }
+  if (!confirm('Excluir este processo?')) return;
+  cfg.processos = cfg.processos.filter((pr) => pr.id !== d.id);
+  salvar(); render();
+};
+
+/* ---------------------------- partida ---------------------------- */
+
+async function iniciar() {
   $('#modal-fechar').addEventListener('click', fecharModal);
   $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') fecharModal(); });
   $('#btn-backup').addEventListener('click', () => acoes.abrirBackup());
-  carregar().then(render);
-});
+  $('#btn-conta').addEventListener('click', () => acoes.abrirConta());
+  $('#btn-sair').addEventListener('click', () => acoes.sair());
+  $('#form-acesso').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const botao = $('#form-acesso button[type="submit"]');
+    botao.disabled = true;
+    try {
+      eu = await Acesso.entrar($('#ac-email').value, $('#ac-senha').value);
+      $('#ac-senha').value = '';
+      await depoisDoLogin();
+    } catch (erro) {
+      mostrarAcesso(erro.message);
+      $('#ac-senha').value = '';
+    }
+    botao.disabled = false;
+  });
+
+  modoLocal = location.protocol === 'file:' || !!window.RECRUTAMENTO_ONLINE;
+  if (!modoLocal) {
+    try {
+      const r = await fetch('api/eu', { cache: 'no-store' });
+      if (r.ok) eu = (await r.json()).usuario;
+      else if (r.status !== 401) throw new Error('sem api');
+    } catch (e) { modoLocal = true; }
+  }
+  if (modoLocal) {
+    carregarLocal();
+    await garantirAdminLocal();
+    eu = sessaoLocal();
+  }
+  marcarModo();
+  if (!eu) { mostrarAcesso(); return; }
+  await depoisDoLogin();
+}
+
+async function depoisDoLogin() {
+  try { await carregar(); } catch (e) { return; }
+  if (ehAdmin()) { try { usuariosCache = await Acesso.listar(); } catch (e) { usuariosCache = []; } }
+  mostrarApp();
+  render();
+  if (eu.precisaTrocarSenha) abrirModal('Troque a senha inicial', formTrocaSenha(true));
+}
+
+window.addEventListener('hashchange', () => { if (eu) render(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !eu?.precisaTrocarSenha) fecharModal(); });
+document.addEventListener('DOMContentLoaded', iniciar);
 
 </script>
 </body>

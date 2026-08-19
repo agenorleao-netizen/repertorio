@@ -4,31 +4,79 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sistema de Recrutamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="topo">
-  <div class="marca">🧭 <strong>Recrutamento</strong></div>
-  <nav class="menu">
-    <a href="#/painel" data-rota="painel">Painel</a>
-    <a href="#/assignments" data-rota="assignments">Assignments</a>
-    <a href="#/candidatos" data-rota="candidatos">Candidatos</a>
-    <a href="#/clientes" data-rota="clientes">Clientes</a>
-    <a href="#/relatorios" data-rota="relatorios">Relatórios</a>
-  </nav>
-  <div class="topo-dir">
-    <span id="aviso-modo" class="tag tag-cinza" title=""></span>
-    <button class="btn btn-fantasma" id="btn-backup">Backup</button>
-  </div>
-</header>
 
-<main id="app" class="conteudo"></main>
+<!-- ---------------------------- acesso ---------------------------- -->
+<div id="acesso" class="acesso escondido">
+  <div class="acesso-caixa">
+    <div class="acesso-marca">
+      <span class="nome">Recrutamento</span>
+      <span class="sub">Executive search · busca e seleção</span>
+    </div>
+    <div class="acesso-cartao">
+      <div id="acesso-erro" class="acesso-erro escondido"></div>
+      <form id="form-acesso">
+        <div class="campo">
+          <label for="ac-email">Usuário</label>
+          <input id="ac-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+        </div>
+        <div class="campo">
+          <label for="ac-senha">Senha</label>
+          <input id="ac-senha" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn" type="submit" style="width:100%;justify-content:center">Entrar</button>
+      </form>
+      <div id="acesso-nota" class="acesso-nota"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ---------------------------- aplicativo ---------------------------- -->
+<div id="aplicativo" class="aplicativo escondido">
+  <aside class="lateral">
+    <div class="marca">
+      <span class="nome">Recrutamento</span>
+      <span class="sub">Executive search</span>
+    </div>
+    <nav class="menu">
+      <a href="#/painel" data-rota="painel"><span class="ic">◆</span> Painel</a>
+      <a href="#/assignments" data-rota="assignments"><span class="ic">▤</span> Assignments</a>
+      <a href="#/candidatos" data-rota="candidatos"><span class="ic">◎</span> Profissionais</a>
+      <a href="#/clientes" data-rota="clientes"><span class="ic">▣</span> Clientes</a>
+      <a href="#/relatorios" data-rota="relatorios"><span class="ic">▧</span> Relatórios</a>
+      <a href="#/usuarios" data-rota="usuarios" id="menu-usuarios"><span class="ic">◍</span> Usuários</a>
+      <a href="#/configuracoes" data-rota="configuracoes" id="menu-configuracoes"><span class="ic">⚙</span> Configurações</a>
+    </nav>
+    <div class="lateral-rodape">
+      <div class="usuario-caixa">
+        <div class="avatar avatar-p" id="eu-avatar">—</div>
+        <div class="quem">
+          <b id="eu-nome">—</b>
+          <span id="eu-papel"></span>
+        </div>
+      </div>
+      <div class="linha">
+        <button class="btn btn-fantasma btn-mini" id="btn-conta">Minha conta</button>
+        <button class="btn btn-fantasma btn-mini" id="btn-backup">Backup</button>
+        <button class="btn btn-fantasma btn-mini" id="btn-sair">Sair</button>
+      </div>
+      <span class="tag tag-cinza" id="aviso-modo" title="" style="justify-content:center"></span>
+    </div>
+  </aside>
+
+  <main id="app" class="conteudo"></main>
+</div>
 
 <div id="modal" class="modal escondido">
   <div class="modal-caixa">
     <div class="modal-topo">
       <h3 id="modal-titulo"></h3>
-      <button class="btn btn-fantasma" id="modal-fechar">✕</button>
+      <button class="btn btn-fantasma btn-mini" id="modal-fechar" aria-label="Fechar">✕</button>
     </div>
     <div id="modal-corpo" class="modal-corpo"></div>
   </div>
